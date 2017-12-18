@@ -125,11 +125,14 @@ CONFIGURE_ARGS += \
 	--without-pam \
 	--without-winbind \
 	--without-libtdb \
+	--disable-external-libtdb \
 	--without-libtalloc \
+	--disable-external-libtalloc \
 	--without-libnetapi \
 	--without-libsmbclient \
 	--without-libsmbsharemodes \
 	--without-libtevent \
+	--disable-external-libtevent \
 	--without-libaddns \
 	--with-shared-modules=pdb_tdbsam,pdb_wbc_sam,idmap_nss,nss_info_template,auth_winbind,auth_wbc,auth_domain
 
