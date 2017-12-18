@@ -1,0 +1,154 @@
+--- a/ustream-openssl.c
++++ b/ustream-openssl.c
+@@ -22,12 +22,75 @@
+ #include "ustream-ssl.h"
+ #include "ustream-internal.h"
+ 
++#ifndef CYASSL_OPENSSL_H_
++DH *get_dh2048()
++{
++	static unsigned char dh2048_p[]={
++		0x8F,0xC4,0xF6,0xB8,0xF6,0x46,0xC4,0xA9,0x68,0x54,0x3D,0x74,
++		0xC6,0x66,0xC6,0x5A,0x0D,0x71,0x80,0x65,0xAD,0xE9,0x14,0xBF,
++		0x4B,0xB9,0xB9,0x7B,0xF5,0x81,0xEB,0xB9,0xB1,0x95,0x4D,0x18,
++		0x1B,0xFC,0xC8,0xB3,0xCC,0x4F,0xA4,0x3A,0xA2,0xCA,0x06,0x8E,
++		0x5A,0x95,0xA5,0xB9,0xF7,0x88,0x57,0xB9,0x59,0x26,0xE3,0xF8,
++		0xE5,0x45,0x0E,0xA5,0xBF,0x84,0x71,0x7C,0xE0,0x6B,0x5F,0x0B,
++		0x96,0x5E,0xD0,0x5C,0xF0,0x90,0x3C,0xD5,0x45,0x47,0xB8,0x09,
++		0x94,0xCE,0x58,0x51,0x02,0x44,0x02,0x5B,0xFE,0x56,0xC8,0xBF,
++		0xBD,0x6C,0x6F,0x03,0x6C,0xAC,0xDB,0xC2,0xC9,0x13,0x03,0xC6,
++		0x53,0x84,0x43,0xA9,0x22,0xC9,0xB0,0x98,0x37,0x75,0x89,0xED,
++		0x7D,0xC1,0xD3,0x63,0xE7,0x1F,0x3F,0x0C,0x19,0xCD,0xD0,0x3E,
++		0x2A,0xD9,0xD1,0x7B,0x42,0xFA,0x07,0x14,0xD7,0x24,0x11,0xC0,
++		0x73,0x1D,0xB7,0x51,0x93,0x55,0x31,0x07,0x98,0x67,0x74,0x2D,
++		0x93,0x43,0xBE,0x1B,0x8C,0x18,0xB8,0x72,0xED,0x72,0xED,0x17,
++		0x7C,0x8B,0x2A,0xCC,0x35,0xF5,0x69,0xE9,0x67,0x66,0x6B,0x1D,
++		0x41,0x04,0xE1,0x67,0x80,0xE3,0x8D,0x53,0x95,0x1D,0x75,0x25,
++		0xD4,0xCB,0x0C,0xB0,0x1E,0x53,0xA5,0x8C,0x67,0xF6,0x5E,0xCF,
++		0x35,0x25,0x02,0xC9,0x2B,0xC8,0x2F,0xC0,0xB2,0x23,0x55,0xDF,
++		0xF9,0xAC,0x4F,0x97,0x10,0x98,0xDB,0x91,0xC8,0x99,0xF2,0xF2,
++		0x92,0xB7,0x05,0x50,0xC9,0x7A,0x69,0x70,0x78,0x20,0xAD,0x91,
++		0x11,0x96,0xC9,0x34,0x83,0xFB,0x23,0x6C,0x5D,0x52,0x05,0x6E,
++		0x62,0x7D,0xAF,0x0B,
++	};
++	static unsigned char dh2048_g[]={
++		0x02,
++	};
++	DH *dh = DH_new();
++	BIGNUM *dhp_bn, *dhg_bn;
++
++	if (dh == NULL)
++		return NULL;
++	dhp_bn=BN_bin2bn(dh2048_p,sizeof(dh2048_p),NULL);
++	dhg_bn=BN_bin2bn(dh2048_g,sizeof(dh2048_g),NULL);
++
++# if OPENSSL_VERSION_NUMBER > 0x10100000L
++	if (dhp_bn == NULL || dhg_bn == NULL
++		|| !DH_set0_pqg(dh, dhp_bn, NULL, dhg_bn)) 
++# else
++	dh->p=dhp_bn;
++	dh->g=dhg_bn;
++	if ((dh->p == NULL) || (dh->g == NULL)) 
++# endif
++	{
++		DH_free(dh);
++		BN_free(dhp_bn);
++		BN_free(dhg_bn);
++		return NULL;
++	}
++        return dh;
++}
++
++#endif
++
+ __hidden struct ustream_ssl_ctx *
+ __ustream_ssl_context_new(bool server)
+ {
+ 	static bool _init = false;
+ 	const void *m;
+ 	SSL_CTX *c;
++#ifndef CYASSL_OPENSSL_H_
++	DH *dh;
++# ifndef SSL_CTX_set_ecdh_auto
++	EC_KEY *ecdh;
++# endif
++#endif
+ 
+ 	if (!_init) {
+ 		SSL_load_error_strings();
+@@ -54,7 +117,30 @@ __ustream_ssl_context_new(bool server)
+ 	if (!c)
+ 		return NULL;
+ 
++#if OPENSSL_VERSION_NUMBER > 0x10100000L
++	if (server)
++		SSL_CTX_set_min_proto_version(c, TLS1_2_VERSION);
++#endif
+ 	SSL_CTX_set_verify(c, SSL_VERIFY_NONE, NULL);
++	SSL_CTX_set_options (c, SSL_OP_ALL | SSL_OP_CIPHER_SERVER_PREFERENCE | SSL_OP_NO_SSLv2 |
++				SSL_OP_NO_SSLv3 | SSL_OP_NO_TICKET | SSL_OP_SINGLE_DH_USE | SSL_OP_SINGLE_ECDH_USE);
++#ifndef CYASSL_OPENSSL_H_
++	SSL_CTX_set_options (c, SSL_OP_NO_COMPRESSION);
++	dh = get_dh2048();
++	SSL_CTX_set_tmp_dh(c, dh);
++	DH_free(dh);
++# ifdef SSL_CTX_set_ecdh_auto
++	SSL_CTX_set1_curves_list(c, "prime256v1:secp384r1");
++	SSL_CTX_set_ecdh_auto(c, 1);
++# else
++	ecdh = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
++	if (ecdh != NULL) {
++		SSL_CTX_set_tmp_ecdh(c, ecdh);
++		EC_KEY_free(ecdh);
++	}
++# endif
++#endif
++	SSL_CTX_set_cipher_list(c, SSLCIPHERLIST);
+ 	SSL_CTX_set_quiet_shutdown(c, 1);
+ 
+ 	return (void *) c;
+@@ -74,6 +160,10 @@ __hidden int __ustream_ssl_add_ca_crt_fi
+ __hidden int __ustream_ssl_set_crt_file(struct ustream_ssl_ctx *ctx, const char *file)
+ {
+ 	int ret;
++#ifndef CYASSL_OPENSSL_H_
++	char *sctfile;
++	size_t len;
++#endif
+ 
+ 	ret = SSL_CTX_use_certificate_chain_file((void *) ctx, file);
+ 	if (ret < 1)
+@@ -82,6 +172,14 @@ __hidden int __ustream_ssl_set_crt_file(
+ 	if (ret < 1)
+ 		return -1;
+ 
++#ifndef CYASSL_OPENSSL_H_
++	len = strlen (file) + 5;
++	sctfile = (char *) malloc (len);
++	snprintf (sctfile, len, "%s.sct", file);
++	ret = SSL_CTX_use_serverinfo_file((void *) ctx, sctfile);
++	free (sctfile);
++#endif
++
+ 	return 0;
+ }
+ 
+--- a/ustream-openssl.h
++++ b/ustream-openssl.h
+@@ -23,6 +23,16 @@
+ #include <openssl/err.h>
+ #include <stdbool.h>
+ 
++#ifndef CYASSL_OPENSSL_H_
++# ifndef HEADER_DH_H
++# include <openssl/dh.h>
++# endif
++
++DH *get_dh2048();
++#endif
++
++#define SSLCIPHERLIST "TLS13-CHACHA20-POLY1305-SHA256:TLS13-AES-128-GCM-SHA256:TLS13-AES-256-GCM-SHA384:TLS13-AES-128-CCM-SHA256:TLS13-AES-128-CCM-8-SHA256:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-CHACHA20-POLY1305-D:ECDHE-RSA-CHACHA20-POLY1305-D:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA:ECDHE-ECDSA-DES-CBC3-SHA:ECDHE-RSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA"
++
+ void __ustream_ssl_session_free(void *ssl);
+ 
+ static inline void *__ustream_ssl_session_new(void *ctx)
