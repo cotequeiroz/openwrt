@@ -17,7 +17,7 @@ PKG_SOURCE_URL:=https://www.busybox.net/downloads \
 		http://sources.buildroot.net
 PKG_HASH:=9d4be516b61e6480f156b11eb42577a13529f75d3383850bb75c50c285de63df
 
-PKG_BUILD_DEPENDS:=BUSYBOX_USE_LIBRPC:librpc BUSYBOX_CONFIG_PAM:libpam
+PKG_BUILD_DEPENDS:=BUSYBOX_USE_LIBRPC:libtirpc BUSYBOX_CONFIG_PAM:libpam
 PKG_BUILD_PARALLEL:=1
 PKG_CHECK_FORMAT_SECURITY:=0
 
@@ -46,7 +46,7 @@ define Package/busybox
   MAINTAINER:=Felix Fietkau <nbd@nbd.name>
   TITLE:=Core utilities for embedded Linux
   URL:=http://busybox.net/
-  DEPENDS:=+BUSYBOX_USE_LIBRPC:librpc +BUSYBOX_CONFIG_PAM:libpam +BUSYBOX_CONFIG_NTPD:jsonfilter
+  DEPENDS:=+BUSYBOX_USE_LIBRPC:libtirpc +BUSYBOX_CONFIG_PAM:libpam +BUSYBOX_CONFIG_NTPD:jsonfilter
   MENU:=1
   PROVIDES:=ip
   ALTERNATIVES:=\
@@ -90,7 +90,7 @@ endef
 
 LDLIBS:=m crypt
 ifdef CONFIG_BUSYBOX_USE_LIBRPC
-  TARGET_CFLAGS += -I$(STAGING_DIR)/usr/include
+  TARGET_CFLAGS += -I$(STAGING_DIR)/usr/include/tirpc
   export LDFLAGS=$(TARGET_LDFLAGS)
   LDLIBS += rpc
 endif
