@@ -56,6 +56,7 @@ define Package/dropbear/description
 endef
 
 define Package/dropbear/conffiles
+/etc/dropbear/dropbear_ecdsa_host_key
 /etc/dropbear/dropbear_rsa_host_key
 /etc/config/dropbear 
 endef
@@ -138,7 +139,7 @@ define Package/dropbear/install
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_DATA) ./files/dropbear.config $(1)/etc/config/dropbear
 	$(INSTALL_DIR) $(1)/etc/init.d
-	$(INSTALL_BIN) ./files/dropbear.init $(1)/etc/init.d/dropbear
+	$(INSTALL_BIN) ./files/dropbear.init$(if $(CONFIG_DROPBEAR_ECC),.ecc,) $(1)/etc/init.d/dropbear
 	$(INSTALL_DIR) $(1)/usr/lib/opkg/info
 	$(INSTALL_DIR) $(1)/etc/dropbear
 	touch $(1)/etc/dropbear/dropbear_rsa_host_key
