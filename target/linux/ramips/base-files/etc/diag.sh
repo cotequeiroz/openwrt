@@ -37,6 +37,7 @@ get_status_led() {
 	nbg-419n2|\
 	pwh2004|\
 	r6220|\
+	tplink,tl-mr3420-v5|\
 	tl-wr840n-v4|\
 	tl-wr840n-v5|\
 	tl-wr841n-v13|\
@@ -174,7 +175,7 @@ get_status_led() {
 		status_led="$boardname:blue:status"
 		;;
 	linkits7688)
-		[ "$1" = "upgrade" ] && status_led="mediatek:orange:wifi"
+		status_led="linkit-smart-7688:orange:wifi"
 		;;
 	m2m)
 		status_led="$boardname:blue:wifi"

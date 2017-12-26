@@ -245,6 +245,9 @@ kng_rc)
 	set_usb_led "$boardname:green:usb"
 	set_wifi_led "$boardname:green:wifi"
 	;;
+linkits7688)
+	ucidef_set_led_wlan "wifi" "wifi" "linkit-smart-7688:orange:wifi" "phy0tpt"
+	;;
 m2m)
 	set_wifi_led "$boardname:blue:wifi"
 	ucidef_set_led_netdev "eth" "Ethernet" "$boardname:green:wan" "eth0"
@@ -379,6 +382,12 @@ tl-wr841n-v13)
 	ucidef_set_led_switch "lan2" "lan2" "$boardname:green:lan2" "switch0" "0x4"
 	ucidef_set_led_switch "lan3" "lan3" "$boardname:green:lan3" "switch0" "0x8"
 	ucidef_set_led_switch "lan4" "lan4" "$boardname:green:lan4" "switch0" "0x10"
+	ucidef_set_led_switch "wan" "wan" "$boardname:green:wan" "switch0" "0x01"
+	;;
+tplink,tl-mr3420-v5)
+	set_usb_led "$boardname:green:usb"
+	set_wifi_led "$boardname:green:wlan"
+	ucidef_set_led_switch "lan" "lan" "$boardname:green:lan" "switch0" "0x1e"
 	ucidef_set_led_switch "wan" "wan" "$boardname:green:wan" "switch0" "0x01"
 	;;
 u25awf-h1)
