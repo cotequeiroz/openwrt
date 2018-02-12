@@ -209,6 +209,7 @@ platform_check_image() {
 	cf-e316n-v2|\
 	cf-e320n-v2|\
 	cf-e355ac|\
+	cf-e375ac|\
 	cf-e380ac-v1|\
 	cf-e380ac-v2|\
 	cf-e520n|\
@@ -237,6 +238,7 @@ platform_check_image() {
 	epg5000|\
 	esr1750|\
 	esr900|\
+	ew-balin|\
 	ew-dorin|\
 	ew-dorin-router|\
 	gl-ar150|\

@@ -28,7 +28,7 @@ define Build/mkwrggimg
 	$(STAGING_DIR_HOST)/bin/mkwrggimg -b \
 		-i $@ -o $@.imghdr -d /dev/mtdblock/1 \
 		-m $(BOARDNAME) -s $(DAP_SIGNATURE) \
-		-v OpenWrt -B $(REVISION)
+		-v $(VERSION_DIST) -B $(REVISION)
 	mv $@.imghdr $@
 endef
 
@@ -46,7 +46,7 @@ define Build/netgear-squashfs
 		-A mips -O linux -T filesystem -C none \
 		-M $(NETGEAR_KERNEL_MAGIC) \
 		-a 0xbf070000 -e 0xbf070000 \
-		-n 'MIPS OpenWrt Linux-$(LINUX_VERSION)' \
+		-n 'MIPS $(VERSION_DIST) Linux-$(LINUX_VERSION)' \
 		-d $@.squashfs $@
 	rm -rf $@.squashfs $@.fs
 endef
@@ -93,7 +93,7 @@ define Build/uImageHiWiFi
 	mkimage -A $(LINUX_KARCH) \
 		-O linux -T kernel \
 		-C $(1) -a $(KERNEL_LOADADDR) -e $(if $(KERNEL_ENTRY),$(KERNEL_ENTRY),$(KERNEL_LOADADDR)) \
-		-n 'tw150v1 $(call toupper,$(LINUX_KARCH)) OpenWrt Linux-$(LINUX_VERSION)' -d $@ $@.new
+		-n 'tw150v1 $(call toupper,$(LINUX_KARCH)) $(VERSION_DIST) Linux-$(LINUX_VERSION)' -d $@ $@.new
 	@mv $@.new $@
 endef
 
@@ -203,6 +203,15 @@ define Device/cf-e355ac
 endef
 TARGET_DEVICES += cf-e355ac
 
+define Device/cf-e375ac
+  DEVICE_TITLE := COMFAST CF-E375AC
+  DEVICE_PACKAGES := kmod-ath10k ath10k-firmware-qca9888
+  BOARDNAME := CF-E375AC
+  IMAGE_SIZE := 16000k
+  MTDPARTS := spi0.0:256k(u-boot)ro,64k(art)ro,16000k(firmware),64k(art-backup)ro
+endef
+TARGET_DEVICES += cf-e375ac
+
 define Device/cf-e380ac-v1
   DEVICE_TITLE := COMFAST CF-E380AC v1
   DEVICE_PACKAGES := kmod-usb-core kmod-usb2 kmod-ath10k ath10k-firmware-qca988x
@@ -271,6 +280,15 @@ define Device/dragino2
   MTDPARTS := spi0.0:256k(u-boot)ro,16000k(firmware),64k(config)ro,64k(art)ro
 endef
 TARGET_DEVICES += dragino2
+
+define Device/ew-balin
+  DEVICE_TITLE := Embedded Wireless Balin Platform
+  DEVICE_PACKAGES := kmod-usb-core kmod-usb-chipidea 
+  BOARDNAME = EW-BALIN
+  IMAGE_SIZE = 16000k
+  MTDPARTS = spi0.0:256k(u-boot)ro,64k(u-boot-env),16000k(firmware),64k(art)ro
+endef
+TARGET_DEVICES += ew-balin
 
 define Device/ew-dorin
   DEVICE_TITLE := Embedded Wireless Dorin Platform

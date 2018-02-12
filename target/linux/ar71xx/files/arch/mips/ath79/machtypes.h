@@ -64,6 +64,7 @@ enum ath79_mach_type {
 	ATH79_MACH_CF_E316N_V2,			/* COMFAST CF-E316N v2 */
 	ATH79_MACH_CF_E320N_V2,			/* COMFAST CF-E320N v2 */
 	ATH79_MACH_CF_E355AC,			/* COMFAST CF-E355AC */
+	ATH79_MACH_CF_E375AC,			/* COMFAST CF-E375AC */
 	ATH79_MACH_CF_E380AC_V1,		/* COMFAST CF-E380AC v1 */
 	ATH79_MACH_CF_E380AC_V2,		/* COMFAST CF-E380AC v2 */
 	ATH79_MACH_CF_E520N,			/* COMFAST CF-E520N */
@@ -107,6 +108,7 @@ enum ath79_mach_type {
 	ATH79_MACH_EPG5000,			/* EnGenius EPG5000 */
 	ATH79_MACH_ESR1750,			/* EnGenius ESR1750 */
 	ATH79_MACH_ESR900,			/* EnGenius ESR900 */
+	ATH79_MACH_EW_BALIN,			/* embedded wireless Balin Platform */
 	ATH79_MACH_EW_DORIN,			/* embedded wireless Dorin Platform */
 	ATH79_MACH_EW_DORIN_ROUTER,		/* embedded wireless Dorin Router Platform */
 	ATH79_MACH_F9K1115V2,			/* Belkin AC1750DB */
