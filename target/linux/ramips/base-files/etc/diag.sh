@@ -91,6 +91,7 @@ get_status_led() {
 	dir-620-d1|\
 	dwr-512-b|\
 	gb-pc1|\
+	gnubee,gb-pc2|\
 	hpm|\
 	hw550-3g|\
 	mac1200rv2|\
@@ -146,6 +147,13 @@ get_status_led() {
 	youku-yk1)
 		status_led="$boardname:blue:power"
 		;;
+	dlink,dap-1522-a1|\
+	k2p|\
+	m3|\
+	mir3g|\
+	miwifi-nano)
+		status_led="$boardname:blue:status"
+		;;
 	db-wrt01|\
 	esr-9753|\
 	pbr-d1)
@@ -172,12 +180,6 @@ get_status_led() {
 		;;
 	hc5962)
 		status_led="$boardname:white:status"
-		;;
-	k2p|\
-	m3|\
-	mir3g|\
-	miwifi-nano)
-		status_led="$boardname:blue:status"
 		;;
 	linkits7688)
 		status_led="linkit-smart-7688:orange:wifi"

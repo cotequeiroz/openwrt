@@ -202,7 +202,8 @@ ramips_setup_interfaces()
 		ucidef_add_switch "switch0" \
 			"1:lan:4" "2:lan:3" "3:lan:2" "4:lan:1" "0:wan" "6@eth0"
 		;;
-	gb-pc1)
+	gb-pc1|\
+	gnubee,gb-pc2)
 		ucidef_add_switch "switch0" \
 			"0:lan" "4:lan" "6@eth0"
 		;;
@@ -238,6 +239,7 @@ ramips_setup_interfaces()
 		;;
 	cs-qr10|\
 	d105|\
+	dlink,dap-1522-a1|\
 	dch-m225|\
 	ex2700|\
 	ex3700|\
@@ -246,6 +248,7 @@ ramips_setup_interfaces()
 	mzk-ex750np|\
 	na930|\
 	pbr-d1|\
+	tama,w06|\
 	u25awf-h1|\
 	wli-tx4-ag300n|\
 	wmdr-143n|\
