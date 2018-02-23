@@ -78,6 +78,9 @@ get_status_led() {
 	wrh-300cr)
 		status_led="$boardname:green:wps"
 		;;
+	alfa-network,awusfree1)
+		status_led="$boardname:orange:system"
+		;;
 	all0239-3g|\
 	dcs-930|\
 	dir-300-b1|\
@@ -188,7 +191,7 @@ get_status_led() {
 		status_led="$boardname:blue:wifi"
 		;;
 	gl-mt300n-v2)
-		status_led="$boardname:red:wlan"
+		status_led="$boardname:green:power"
 		;;
 	m4-4M|\
 	m4-8M)
