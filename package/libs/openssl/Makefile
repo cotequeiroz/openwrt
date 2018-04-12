@@ -8,8 +8,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=openssl
-PKG_BASE:=1.0.2
-PKG_BUGFIX:=n
+PKG_BASE:=1.1.0
+PKG_BUGFIX:=h
 PKG_VERSION:=$(PKG_BASE)$(PKG_BUGFIX)
 PKG_RELEASE:=1
 PKG_USE_MIPS16:=0
@@ -24,7 +24,7 @@ PKG_SOURCE_URL:= \
 	http://gd.tuwien.ac.at/infosys/security/openssl/source/ \
 	http://www.openssl.org/source/ \
 	http://www.openssl.org/source/old/$(PKG_BASE)/
-PKG_HASH:=370babb75f278c39e0c50e8c4e7493bc0f18db6867478341a832a982fd15a8fe
+PKG_HASH:=5835626cde9e99656585fc7aaa2302a73a7e1340bf8c14fd635a62c66802a517
 
 PKG_LICENSE:=OpenSSL
 PKG_LICENSE_FILES:=LICENSE
@@ -34,12 +34,10 @@ PKG_CONFIG_DEPENDS:= \
 	CONFIG_OPENSSL_ENGINE_DIGEST \
 	CONFIG_OPENSSL_WITH_EC \
 	CONFIG_OPENSSL_WITH_EC2M \
-	CONFIG_OPENSSL_WITH_SSL3 \
 	CONFIG_OPENSSL_HARDWARE_SUPPORT \
 	CONFIG_OPENSSL_WITH_DEPRECATED \
 	CONFIG_OPENSSL_WITH_DTLS \
 	CONFIG_OPENSSL_WITH_COMPRESSION \
-	CONFIG_OPENSSL_WITH_NPN \
 	CONFIG_OPENSSL_WITH_PSK \
 	CONFIG_OPENSSL_WITH_SRP \
 	CONFIG_OPENSSL_OPTIMIZE_SPEED
@@ -52,7 +50,7 @@ HOSTCXX=$(HOSTCXX_NOCACHE)
 endif
 
 define Package/openssl/Default
-  TITLE:=Open source SSL toolkit
+  TITLE:=Open source SSL toolkit v 1.1
   URL:=http://www.openssl.org/
 endef
 
@@ -91,19 +89,14 @@ define Package/openssl-util
   TITLE+= (utility)
 endef
 
-define Package/openssl-util/conffiles
-/etc/ssl/openssl.cnf
-endef
-
 define Package/openssl-util/description
 $(call Package/openssl/Default/description)
 This package contains the OpenSSL command-line utility.
 endef
 
 
-OPENSSL_NO_CIPHERS:= no-idea no-md2 no-mdc2 no-rc5 no-sha0 no-camellia no-krb5 \
- no-whrlpool no-whirlpool no-seed no-jpake
-OPENSSL_OPTIONS:= shared no-err no-sse2 no-ssl2 no-ssl2-method no-heartbeats
+OPENSSL_NO_CIPHERS:= no-idea no-mdc2 no-camellia no-whirlpool no-seed
+OPENSSL_OPTIONS:= shared no-err no-heartbeats
 
 ifdef CONFIG_OPENSSL_ENGINE_CRYPTO
   OPENSSL_OPTIONS += -DHAVE_CRYPTODEV
@@ -111,7 +104,7 @@ ifdef CONFIG_OPENSSL_ENGINE_CRYPTO
     OPENSSL_OPTIONS += -DUSE_CRYPTODEV_DIGESTS
   endif
 else
-  OPENSSL_OPTIONS += no-engines
+  OPENSSL_OPTIONS += no-engine
 endif
 
 ifndef CONFIG_OPENSSL_WITH_EC
@@ -120,10 +113,6 @@ endif
 
 ifndef CONFIG_OPENSSL_WITH_EC2M
   OPENSSL_OPTIONS += no-ec2m
-endif
-
-ifndef CONFIG_OPENSSL_WITH_SSL3
-  OPENSSL_OPTIONS += no-ssl3 no-ssl3-method
 endif
 
 ifndef CONFIG_OPENSSL_HARDWARE_SUPPORT
@@ -144,10 +133,6 @@ else
   OPENSSL_OPTIONS += no-comp
 endif
 
-ifndef CONFIG_OPENSSL_WITH_NPN
-  OPENSSL_OPTIONS += no-nextprotoneg
-endif
-
 ifndef CONFIG_OPENSSL_WITH_PSK
   OPENSSL_OPTIONS += no-psk
 endif
@@ -164,9 +149,9 @@ ifeq ($(CONFIG_x86_64),y)
   OPENSSL_TARGET:=linux-x86_64-openwrt
   OPENSSL_MAKEFLAGS += LIBDIR=lib
 else
-  OPENSSL_OPTIONS+=no-sse2
+  OPENSSL_OPTIONS+= no-sse2
   ifeq ($(CONFIG_mips)$(CONFIG_mipsel),y)
-    OPENSSL_TARGET:=linux-mips-openwrt
+    OPENSSL_TARGET:=linux-mips32-openwrt
   else ifeq ($(CONFIG_aarch64),y)
     OPENSSL_TARGET:=linux-aarch64-openwrt
   else ifeq ($(CONFIG_arm)$(CONFIG_armeb),y)
@@ -191,6 +176,7 @@ define Build/Configure
 			$(TARGET_CPPFLAGS) \
 			$(TARGET_LDFLAGS) -ldl \
 			$(if $(CONFIG_OPENSSL_OPTIMIZE_SPEED),,-DOPENSSL_SMALL_FOOTPRINT) \
+			-DOPENSSL_NO_ASYNC \
 			$(OPENSSL_NO_CIPHERS) \
 			$(OPENSSL_OPTIONS) \
 	)
@@ -215,29 +201,12 @@ define Build/Compile
 		OPENWRT_OPTIMIZATION_FLAGS="$(TARGET_CFLAGS)" \
 		$(OPENSSL_MAKEFLAGS) \
 		all
-	+$(MAKE) $(PKG_JOBS) -C $(PKG_BUILD_DIR) \
-		CROSS_COMPILE="$(TARGET_CROSS)" \
-		CC="$(TARGET_CC)" \
-		ASFLAGS="$(TARGET_ASFLAGS) -I$(PKG_BUILD_DIR)/crypto -c" \
-		AR="$(TARGET_CROSS)ar r" \
-		RANLIB="$(TARGET_CROSS)ranlib" \
-		OPENWRT_OPTIMIZATION_FLAGS="$(TARGET_CFLAGS)" \
-		$(OPENSSL_MAKEFLAGS) \
-		build-shared
-	# Work around openssl build bug to link libssl.so with libcrypto.so.
-	-rm $(PKG_BUILD_DIR)/libssl.so.*.*.*
-	+$(MAKE) $(PKG_JOBS) -C $(PKG_BUILD_DIR) \
-		CROSS_COMPILE="$(TARGET_CROSS)" \
-		CC="$(TARGET_CC)" \
-		OPENWRT_OPTIMIZATION_FLAGS="$(TARGET_CFLAGS)" \
-		$(OPENSSL_MAKEFLAGS) \
-		do_linux-shared
 	$(MAKE) -C $(PKG_BUILD_DIR) \
 		CROSS_COMPILE="$(TARGET_CROSS)" \
 		CC="$(TARGET_CC)" \
-		INSTALL_PREFIX="$(PKG_INSTALL_DIR)" \
+		DESTDIR="$(PKG_INSTALL_DIR)" \
 		$(OPENSSL_MAKEFLAGS) \
-		install
+		install_sw install_ssldirs
 endef
 
 define Build/InstallDev
