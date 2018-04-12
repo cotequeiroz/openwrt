@@ -75,7 +75,7 @@
  {
  	BIO *bio;
  
-+#if OPENSSL_VERSION_NUMBER > 0x10100000L
++#if OPENSSL_VERSION_NUMBER >= 0x10100000L
 +	BIO_METHOD *methods_ustream;
 +
 +	methods_ustream = BIO_meth_new(BIO_get_new_index() | BIO_TYPE_SOURCE_SINK, "ustream");
@@ -101,13 +101,13 @@
  	if (server)
  #ifdef CYASSL_OPENSSL_H_
  		m = SSLv23_server_method();
-+#elif OPENSSL_VERSION_NUMBER > 0x10100000L
++#elif OPENSSL_VERSION_NUMBER >= 0x10100000L
 +		m = TLS_server_method();
  #else
  		m = TLSv1_2_server_method();
  #endif
  	else
-+#if OPENSSL_VERSION_NUMBER > 0x10100000L
++#if OPENSSL_VERSION_NUMBER >= 0x10100000L
 +		m = TLS_client_method();
 +#else
  		m = SSLv23_client_method();
