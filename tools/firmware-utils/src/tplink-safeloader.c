@@ -140,10 +140,10 @@ static struct device_info boards[] = {
 			{"default-mac", 0x30000, 0x00020},
 			{"product-info", 0x31100, 0x00100},
 			{"signature", 0x32000, 0x00400},
-			{"os-image", 0x40000, 0x170000},
-			{"soft-version", 0x1b0000, 0x00100},
-			{"support-list", 0x1b1000, 0x00400},
-			{"file-system", 0x1c0000, 0x600000},
+			{"os-image", 0x40000, 0x1c0000},
+			{"file-system", 0x200000, 0x5b0000},
+			{"soft-version", 0x7b0000, 0x00100},
+			{"support-list", 0x7b1000, 0x00400},
 			{"user-config", 0x7c0000, 0x10000},
 			{"default-config", 0x7d0000, 0x10000},
 			{"log", 0x7e0000, 0x10000},
@@ -152,7 +152,7 @@ static struct device_info boards[] = {
 		},
 
 		.first_sysupgrade_partition = "os-image",
-		.last_sysupgrade_partition = "file-system",
+		.last_sysupgrade_partition = "support-list",
 	},
 
 	/** Firmware layout for the CPE510/520 */
@@ -178,10 +178,10 @@ static struct device_info boards[] = {
 			{"default-mac", 0x30000, 0x00020},
 			{"product-info", 0x31100, 0x00100},
 			{"signature", 0x32000, 0x00400},
-			{"os-image", 0x40000, 0x170000},
-			{"soft-version", 0x1b0000, 0x00100},
-			{"support-list", 0x1b1000, 0x00400},
-			{"file-system", 0x1c0000, 0x600000},
+			{"os-image", 0x40000, 0x1c0000},
+			{"file-system", 0x200000, 0x5b0000},
+			{"soft-version", 0x7b0000, 0x00100},
+			{"support-list", 0x7b1000, 0x00400},
 			{"user-config", 0x7c0000, 0x10000},
 			{"default-config", 0x7d0000, 0x10000},
 			{"log", 0x7e0000, 0x10000},
@@ -190,7 +190,7 @@ static struct device_info boards[] = {
 		},
 
 		.first_sysupgrade_partition = "os-image",
-		.last_sysupgrade_partition = "file-system",
+		.last_sysupgrade_partition = "support-list",
 	},
 
 	{
@@ -210,10 +210,10 @@ static struct device_info boards[] = {
 			{"default-mac", 0x30000, 0x00020},
 			{"product-info", 0x31100, 0x00100},
 			{"signature", 0x32000, 0x00400},
-			{"os-image", 0x40000, 0x170000},
-			{"soft-version", 0x1b0000, 0x00100},
-			{"support-list", 0x1b1000, 0x00400},
-			{"file-system", 0x1c0000, 0x600000},
+			{"os-image", 0x40000, 0x1c0000},
+			{"file-system", 0x200000, 0x5b0000},
+			{"soft-version", 0x7b0000, 0x00100},
+			{"support-list", 0x7b1000, 0x00400},
 			{"user-config", 0x7c0000, 0x10000},
 			{"default-config", 0x7d0000, 0x10000},
 			{"log", 0x7e0000, 0x10000},
@@ -222,7 +222,7 @@ static struct device_info boards[] = {
 		},
 
 		.first_sysupgrade_partition = "os-image",
-		.last_sysupgrade_partition = "file-system",
+		.last_sysupgrade_partition = "support-list",
 	},
 
 	{
@@ -242,10 +242,10 @@ static struct device_info boards[] = {
 			{"default-mac", 0x30000, 0x00020},
 			{"product-info", 0x31100, 0x00100},
 			{"signature", 0x32000, 0x00400},
-			{"os-image", 0x40000, 0x170000},
-			{"soft-version", 0x1b0000, 0x00100},
-			{"support-list", 0x1b1000, 0x00400},
-			{"file-system", 0x1c0000, 0x600000},
+			{"os-image", 0x40000, 0x1c0000},
+			{"file-system", 0x200000, 0x5b0000},
+			{"soft-version", 0x7b0000, 0x00100},
+			{"support-list", 0x7b1000, 0x00400},
 			{"user-config", 0x7c0000, 0x10000},
 			{"default-config", 0x7d0000, 0x10000},
 			{"log", 0x7e0000, 0x10000},
@@ -254,7 +254,7 @@ static struct device_info boards[] = {
 		},
 
 		.first_sysupgrade_partition = "os-image",
-		.last_sysupgrade_partition = "file-system",
+		.last_sysupgrade_partition = "support-list",
 	},
 
 	/** Firmware layout for the C2600 */
@@ -443,6 +443,43 @@ static struct device_info boards[] = {
 			{"os-image", 0x20000, 0x180000},
 			{"file-system", 0x1a0000, 0x648000},
 			{"certyficate", 0x7e8000, 0x08000},
+			{"radio", 0x7f0000, 0x10000},
+			{NULL, 0, 0}
+		},
+
+		.first_sysupgrade_partition = "os-image",
+		.last_sysupgrade_partition = "file-system",
+	},
+
+	/** Firmware layout for the C60v2 */
+	{
+		.id	= "ARCHER-C60-V2",
+		.vendor	= "",
+		.support_list =
+			"SupportList:\r\n"
+			"{product_name:Archer C60,product_ver:2.0.0,special_id:42520000}\r\n"
+			"{product_name:Archer C60,product_ver:2.0.0,special_id:45550000}\r\n"
+			"{product_name:Archer C60,product_ver:2.0.0,special_id:55530000}\r\n",
+		.support_trail = '\x00',
+		.soft_ver = "soft_ver:2.0.0\n",
+
+		.partitions = {
+			{"factory-boot", 0x00000, 0x1fb00},
+			{"default-mac", 0x1fb00, 0x00200},
+			{"pin", 0x1fd00, 0x00100},
+			{"product-info", 0x1fe00, 0x00100},
+			{"device-id", 0x1ff00, 0x00100},
+			{"fs-uboot", 0x20000, 0x10000},
+			{"os-image", 0x30000, 0x180000},
+			{"file-system", 0x1b0000, 0x620000},
+			{"soft-version", 0x7d9500, 0x00100},
+			{"support-list", 0x7d9600, 0x00100},
+			{"extra-para", 0x7d9700, 0x00100},
+			{"profile", 0x7d9800, 0x03000},
+			{"default-config", 0x7dc800, 0x03000},
+			{"partition-table", 0x7df800, 0x00800},
+			{"user-config", 0x7e0000, 0x0c000},
+			{"certificate", 0x7ec000, 0x04000},
 			{"radio", 0x7f0000, 0x10000},
 			{NULL, 0, 0}
 		},
@@ -1343,6 +1380,7 @@ static void build_image(const char *output,
 
 	/* Some devices need the extra-para partition to accept the firmware */
 	if (strcasecmp(info->id, "ARCHER-C25-V1") == 0 ||
+	    strcasecmp(info->id, "ARCHER-C60-V2") == 0 ||
 	    strcasecmp(info->id, "TLWR1043NV5") == 0) {
 		const char mdat[11] = {0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00};
 		parts[5] = put_data("extra-para", mdat, 11);
