@@ -50,7 +50,7 @@ HOSTCXX=$(HOSTCXX_NOCACHE)
 endif
 
 define Package/openssl/Default
-  TITLE:=Open source SSL toolkit v 1.1
+  TITLE:=Open source SSL toolkit
   URL:=http://www.openssl.org/
 endef
 
@@ -87,6 +87,10 @@ define Package/openssl-util
   CATEGORY:=Utilities
   DEPENDS:=+libopenssl
   TITLE+= (utility)
+endef
+
+define Package/openssl-util/conffiles
+/etc/ssl/openssl.cnf
 endef
 
 define Package/openssl-util/description
@@ -158,7 +162,7 @@ else
     OPENSSL_TARGET:=linux-armv4-openwrt
   else
     OPENSSL_TARGET:=linux-generic-openwrt
-    OPENSSL_OPTIONS+=no-perlasm
+    OPENSSL_OPTIONS+= no-perlasm
   endif
 endif
 
