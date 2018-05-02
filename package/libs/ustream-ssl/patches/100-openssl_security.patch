@@ -1,10 +1,10 @@
 --- a/ustream-openssl.c
 +++ b/ustream-openssl.c
-@@ -22,12 +22,75 @@
+@@ -22,6 +22,62 @@
  #include "ustream-ssl.h"
  #include "ustream-internal.h"
  
-+#ifndef CYASSL_OPENSSL_H_
++#ifndef NO_DH
 +DH *get_dh2048()
 +{
 +	static unsigned char dh2048_p[]={
@@ -58,96 +58,71 @@
 +	}
 +        return dh;
 +}
-+
 +#endif
 +
  __hidden struct ustream_ssl_ctx *
  __ustream_ssl_context_new(bool server)
  {
- 	static bool _init = false;
- 	const void *m;
- 	SSL_CTX *c;
-+#ifndef CYASSL_OPENSSL_H_
-+	DH *dh;
-+# if OPENSSL_VERSION_NUMBER < 0x10002000L
-+	EC_KEY *ecdh;
-+# endif
-+#endif
+@@ -36,17 +92,13 @@ __ustream_ssl_context_new(bool server)
+ 	}
  
- 	if (!_init) {
- 		SSL_load_error_strings();
-@@ -54,7 +117,32 @@ __ustream_ssl_context_new(bool server)
- 	if (!c)
+ 	if (server)
+-#ifdef CYASSL_OPENSSL_H_
+-		m = SSLv23_server_method();
+-#elif OPENSSL_VERSION_NUMBER >= 0x10100000L
++#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+ 		m = TLS_server_method();
+-#else
+-		m = TLSv1_2_server_method();
+-#endif
+ 	else
+-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+ 		m = TLS_client_method();
+ #else
++		m = TLSv1_2_server_method();
++	else
+ 		m = SSLv23_client_method();
+ #endif
+ 
+@@ -55,15 +107,19 @@ __ustream_ssl_context_new(bool server)
  		return NULL;
  
-+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
-+	if (server)
-+		SSL_CTX_set_min_proto_version(c, TLS1_2_VERSION);
-+#endif
  	SSL_CTX_set_verify(c, SSL_VERIFY_NONE, NULL);
-+	SSL_CTX_set_options (c, SSL_OP_ALL | SSL_OP_CIPHER_SERVER_PREFERENCE | SSL_OP_NO_SSLv2 |
-+				SSL_OP_NO_SSLv3 | SSL_OP_NO_TICKET | SSL_OP_SINGLE_DH_USE | SSL_OP_SINGLE_ECDH_USE);
-+#ifndef CYASSL_OPENSSL_H_
-+	SSL_CTX_set_options (c, SSL_OP_NO_COMPRESSION);
-+	dh = get_dh2048();
-+	SSL_CTX_set_tmp_dh(c, dh);
-+	DH_free(dh);
-+# if OPENSSL_VERSION_NUMBER >= 0x10100000L
+-#if !defined(OPENSSL_NO_ECDH) && !defined(CYASSL_OPENSSL_H_)
+-	SSL_CTX_set_ecdh_auto(c, 1);
+-#endif
+-	if (server) {
++	SSL_CTX_set_options (c, SSL_OP_ALL | SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3 | SSL_OP_NO_TICKET | SSL_OP_SINGLE_DH_USE |
++				SSL_OP_SINGLE_ECDH_USE | SSL_OP_CIPHER_SERVER_PREFERENCE | SSL_OP_NO_COMPRESSION );
+ #if OPENSSL_VERSION_NUMBER >= 0x10100000L
++	if (server)
+ 		SSL_CTX_set_min_proto_version(c, TLS1_2_VERSION);
++# ifndef OPENSSL_NO_ECDH
 +	SSL_CTX_set1_curves_list(c, "x25519:prime256v1:secp384r1");
-+# elif OPENSSL_VERSION_NUMBER > 0x10002000L
++# endif
++#elif !defined(OPENSSL_NO_ECDH) && !defined(CYASSL_OPENSSL_H_)
 +	SSL_CTX_set1_curves_list(c, "prime256v1:secp384r1");
 +	SSL_CTX_set_ecdh_auto(c, 1);
-+# else
-+	ecdh = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
-+	if (ecdh != NULL) {
-+		SSL_CTX_set_tmp_ecdh(c, ecdh);
-+		EC_KEY_free(ecdh);
-+	}
-+# endif
-+#endif
+ #endif
+-		SSL_CTX_set_cipher_list(c, "DEFAULT:!RC4:@STRENGTH");
+-	}
 +	SSL_CTX_set_cipher_list(c, SSLCIPHERLIST);
  	SSL_CTX_set_quiet_shutdown(c, 1);
  
  	return (void *) c;
-@@ -74,6 +162,10 @@ __hidden int __ustream_ssl_add_ca_crt_fi
- __hidden int __ustream_ssl_set_crt_file(struct ustream_ssl_ctx *ctx, const char *file)
- {
- 	int ret;
-+#ifndef CYASSL_OPENSSL_H_
-+	char *sctfile;
-+	size_t len;
-+#endif
- 
- 	ret = SSL_CTX_use_certificate_chain_file((void *) ctx, file);
- 	if (ret < 1)
-@@ -82,6 +174,14 @@ __hidden int __ustream_ssl_set_crt_file(
- 	if (ret < 1)
- 		return -1;
- 
-+#ifndef CYASSL_OPENSSL_H_
-+	len = strlen (file) + 5;
-+	sctfile = (char *) malloc (len);
-+	snprintf (sctfile, len, "%s.sct", file);
-+	ret = SSL_CTX_use_serverinfo_file((void *) ctx, sctfile);
-+	free (sctfile);
-+#endif
-+
- 	return 0;
- }
- 
 --- a/ustream-openssl.h
 +++ b/ustream-openssl.h
 @@ -23,6 +23,16 @@
  #include <openssl/err.h>
  #include <stdbool.h>
  
-+#ifndef CYASSL_OPENSSL_H_
++#ifndef NO_DH
 +# ifndef HEADER_DH_H
 +# include <openssl/dh.h>
 +# endif
 +
 +DH *get_dh2048();
-+#endif
++#endif /* NO_DH */
 +
 +#define SSLCIPHERLIST "ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-CHACHA20-POLY1305-D:ECDHE-RSA-CHACHA20-POLY1305-D:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA:ECDHE-ECDSA-DES-CBC3-SHA:ECDHE-RSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA"
 +
