@@ -26,7 +26,7 @@ tools-y += m4 libtool autoconf automake flex bison pkg-config mklibs zlib
 tools-y += sstrip make-ext4fs e2fsprogs mtd-utils mkimage
 tools-y += firmware-utils patch-image quilt padjffs2
 tools-y += mm-macros missing-macros cmake scons bc findutils gengetopt patchelf
-tools-y += mtools dosfstools libressl
+tools-y += mtools dosfstools
 tools-$(CONFIG_TARGET_orion_generic) += wrt350nv2-builder upslug2
 tools-$(CONFIG_TARGET_x86) += qemu
 tools-$(CONFIG_TARGET_mxs) += elftosb sdimage
@@ -68,9 +68,7 @@ $(curdir)/gengetopt/compile := $(curdir)/libtool/compile
 $(curdir)/patchelf/compile := $(curdir)/libtool/compile
 $(curdir)/dosfstools/compile := $(curdir)/autoconf/compile $(curdir)/automake/compile
 $(curdir)/libressl/compile := $(curdir)/pkg-config/compile
-$(curdir)/mkimage/compile += $(curdir)/libressl/compile
-$(curdir)/firmware-utils/compile += $(curdir)/libressl/compile $(curdir)/zlib/compile
-$(curdir)/cmake/compile += $(curdir)/libressl/compile
+$(curdir)/firmware-utils/compile += $(curdir)/zlib/compile
 $(curdir)/zlib/compile := $(curdir)/cmake/compile
 $(curdir)/wrt350nv2-builder/compile := $(curdir)/zlib/compile
 $(curdir)/lzma-old/compile := $(curdir)/zlib/compile
@@ -78,6 +76,13 @@ $(curdir)/make-ext4fs/compile := $(curdir)/zlib/compile
 
 ifneq ($(HOST_OS),Linux)
   tools-y += coreutils
+endif
+
+ifeq ($(HOST_OS),Darwin)
+  tools-y += libressl
+  $(curdir)/mkimage/compile += $(curdir)/libressl/compile
+  $(curdir)/cmake/compile += $(curdir)/libressl/compile
+  $(curdir)/firmware-utils/compile += $(curdir)/libressl/compile
 endif
 
 ifneq ($(CONFIG_CCACHE)$(CONFIG_SDK),)
