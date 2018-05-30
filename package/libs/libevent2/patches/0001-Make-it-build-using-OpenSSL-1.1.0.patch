@@ -7,11 +7,9 @@ This is a backport of @kroeckx patch that was merged in
 release-2.1.7-rc:
 
     Rebased (azat):
-	- tabs instead of whitespaces
-	- make openssl-compat.h safe for complex
-	  expressions
-	- do not call sk_SSL_COMP_free() in
-	  1.1 (fixes double free)
+    - tabs instead of whitespaces
+    - make openssl-compat.h safe for complex expressions
+    - do not call sk_SSL_COMP_free() in 1.1 (fixes double free)
 
 Signed-off-by: Eneas U de Queiroz <cote2004-github@yahoo.com>
 ---
