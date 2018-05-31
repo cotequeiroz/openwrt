@@ -1,6 +1,10 @@
 --- a/ustream-openssl.c
 +++ b/ustream-openssl.c
-@@ -22,6 +22,62 @@
+@@ -19,9 +19,66 @@
+ #include <string.h>
+ #include <ctype.h>
+ #include <openssl/x509v3.h>
++#include <openssl/bn.h>
  #include "ustream-ssl.h"
  #include "ustream-internal.h"
  
@@ -63,49 +67,42 @@
  __hidden struct ustream_ssl_ctx *
  __ustream_ssl_context_new(bool server)
  {
-@@ -36,17 +92,13 @@ __ustream_ssl_context_new(bool server)
+@@ -38,6 +95,7 @@ __ustream_ssl_context_new(bool server)
  	}
- 
- 	if (server)
--#ifdef CYASSL_OPENSSL_H_
--		m = SSLv23_server_method();
--#elif OPENSSL_VERSION_NUMBER >= 0x10100000L
-+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
- 		m = TLS_server_method();
--#else
--		m = TLSv1_2_server_method();
--#endif
- 	else
--#if OPENSSL_VERSION_NUMBER >= 0x10100000L
- 		m = TLS_client_method();
- #else
-+		m = TLSv1_2_server_method();
-+	else
- 		m = SSLv23_client_method();
- #endif
- 
-@@ -55,15 +107,19 @@ __ustream_ssl_context_new(bool server)
+ # ifdef CYASSL_OPENSSL_H_
+ #  define TLS_server_method SSLv23_server_method
++#  define SSL_CTX_set1_curves_list wolfSSL_CTX_set1_curves_list
+ # else
+ #  define TLS_server_method TLSv1_2_server_method
+ # endif
+@@ -54,15 +112,26 @@ __ustream_ssl_context_new(bool server)
  		return NULL;
  
  	SSL_CTX_set_verify(c, SSL_VERIFY_NONE, NULL);
--#if !defined(OPENSSL_NO_ECDH) && !defined(CYASSL_OPENSSL_H_)
--	SSL_CTX_set_ecdh_auto(c, 1);
--#endif
--	if (server) {
-+	SSL_CTX_set_options (c, SSL_OP_ALL | SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3 | SSL_OP_NO_TICKET | SSL_OP_SINGLE_DH_USE |
-+				SSL_OP_SINGLE_ECDH_USE | SSL_OP_CIPHER_SERVER_PREFERENCE | SSL_OP_NO_COMPRESSION );
- #if OPENSSL_VERSION_NUMBER >= 0x10100000L
-+	if (server)
- 		SSL_CTX_set_min_proto_version(c, TLS1_2_VERSION);
+-#if !defined(OPENSSL_NO_ECDH) && !defined(CYASSL_OPENSSL_H_) && OPENSSL_VERSION_NUMBER < 0x10100000L
++#if OPENSSL_VERSION_NUMBER < 0x10100000L
 +# ifndef OPENSSL_NO_ECDH
-+	SSL_CTX_set1_curves_list(c, "x25519:prime256v1:secp384r1");
++	if (server)
++		SSL_CTX_set1_curves_list(c, "prime256v1:secp384r1:secp521r1");
++#  if OPENSSL_VERSION_NUMBER >= 0x10002000L
+ 	SSL_CTX_set_ecdh_auto(c, 1);
+-#endif
++#  endif
 +# endif
-+#elif !defined(OPENSSL_NO_ECDH) && !defined(CYASSL_OPENSSL_H_)
-+	SSL_CTX_set1_curves_list(c, "prime256v1:secp384r1");
-+	SSL_CTX_set_ecdh_auto(c, 1);
- #endif
++	SSL_CTX_set_options (c, SSL_OP_ALL | SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3 | SSL_OP_NO_TICKET | SSL_OP_SINGLE_DH_USE |
++			     SSL_OP_SINGLE_ECDH_USE | SSL_OP_CIPHER_SERVER_PREFERENCE | SSL_OP_NO_COMPRESSION );
++#else
++	SSL_CTX_set_options (c, SSL_OP_ALL | SSL_OP_NO_TICKET | SSL_OP_CIPHER_SERVER_PREFERENCE );
+ 	if (server) {
+-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
++# ifndef OPENSSL_NO_ECDH
++		SSL_CTX_set1_curves_list(c, "x25519:prime256v1:secp384r1:secp521r1");
++# endif
+ 		SSL_CTX_set_min_proto_version(c, TLS1_2_VERSION);
+-#endif
 -		SSL_CTX_set_cipher_list(c, "DEFAULT:!RC4:@STRENGTH");
--	}
+ 	}
++#endif
 +	SSL_CTX_set_cipher_list(c, SSLCIPHERLIST);
  	SSL_CTX_set_quiet_shutdown(c, 1);
  
