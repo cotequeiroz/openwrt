@@ -12,10 +12,6 @@ config WOLFSSL_HAS_CHACHA
 	bool "Include ChaCha cipher suite support"
 	default n
 
-config WOLFSSL_HAS_ECC
-	bool "Include ECC (Elliptic Curve Cryptography) support"
-	default y
-
 config WOLFSSL_HAS_DH
 	bool "Include DH (Diffie-Hellman) support"
 	default y
@@ -24,12 +20,12 @@ config WOLFSSL_HAS_ARC4
 	bool "Include ARC4 support"
 	default y
 
-config WOLFSSL_HAS_DES3
-	bool "Include DES3 (Tripple-DES) support"
-	default y
-
 config WOLFSSL_HAS_PSK
 	bool "Include PKS (Pre Share Key) support"
+	default y
+
+config WOLFSSL_HAS_SEC_RENEGOTIATION
+	bool "Include secure renegotion support"
 	default y
 
 config WOLFSSL_HAS_SESSION_TICKET
@@ -41,7 +37,7 @@ config WOLFSSL_HAS_DTLS
 	default n
 
 config WOLFSSL_HAS_OCSP
-	bool "Include OSCP support"
+	bool "Include OSCP stapling support"
 	default y
 
 config WOLFSSL_HAS_WPAS
