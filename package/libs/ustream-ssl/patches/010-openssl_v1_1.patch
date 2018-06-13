@@ -3,7 +3,7 @@ new file mode 100644
 index 0000000..dedc412
 --- /dev/null
 +++ b/openssl_bio_compat.h
-@@ -0,0 +1,34 @@
+@@ -0,0 +1,33 @@
 +#ifndef OPENSSL_BIO_COMPAT_H
 +#define OPENSSL_BIO_COMPAT_H
 +
@@ -16,7 +16,6 @@ index 0000000..dedc412
 +#define BIO_get_data(b) (b->ptr)
 +#define BIO_set_data(b, v) (b->ptr = v)
 +#define BIO_set_init(b, v) (b->init = v)
-+#define BIO_set_shutdown(b, v) (b->flags = v)
 +#define BIO_meth_set_write(m, f) (m->bwrite = f)
 +#define BIO_meth_set_read(m, f) (m->bread = f)
 +#define BIO_meth_set_puts(m, f) (m->bputs = f)
@@ -58,7 +57,7 @@ index 6711055..aa9f401 100644
 -	b->flags = 0;
 +	BIO_set_init(b, 1);
 +	BIO_set_data(b, NULL);
-+	BIO_set_shutdown(b, 0);
++	BIO_clear_flags(b, ~0);
  	return 1;
  }
  
@@ -71,7 +70,7 @@ index 6711055..aa9f401 100644
 -	b->flags = 0;
 +	BIO_set_data(b, NULL);
 +	BIO_set_init(b, 0);
-+	BIO_set_shutdown(b, 0);
++	BIO_clear_flags(b, ~0);
  	return 1;
  }
  
