@@ -8,7 +8,11 @@ ath79_setup_interfaces()
 	local board="$1"
 
 	case "$board" in
+	"etactica,eg200")
+		ucidef_set_interface_lan "eth0" "dhcp"
+		;;
 	"avm,fritz300e"|\
+	"tplink,tl-mr10u"|\
 	"tplink,tl-wr703n"|\
 	"ubnt,unifi")
 		ucidef_set_interface_lan "eth0"
@@ -22,7 +26,10 @@ ath79_setup_interfaces()
 	"glinet,ar150")
 		ucidef_set_interfaces_lan_wan "eth1" "eth0"
 		;;
-		
+	"tplink,tl-mr3020-v1")
+		ucidef_set_interface_lan "eth0.1"
+		ucidef_add_switch "switch0" "0@eth0" "1:lan"
+		;;
 	"tplink,tl-wdr3600"|\
 	"tplink,tl-wdr4300")
 		ucidef_add_switch "switch0" \
