@@ -13,7 +13,12 @@ config OPENSSL_WITH_EC2M
 config OPENSSL_WITH_DEPRECATED
 	bool
 	default y
-	prompt "Include deprecated APIs"
+	prompt "Include deprecated APIs (There are several packages that need this.)"
+	help
+		Since openssl 1.1.0 is not supported yet, packages requiring this
+		option do not list it as a requirement.
+		Packages requiring this right now:  hostapd, freeswitch, python, 
+		python3, squid.
 
 config OPENSSL_WITH_DTLS
 	bool
