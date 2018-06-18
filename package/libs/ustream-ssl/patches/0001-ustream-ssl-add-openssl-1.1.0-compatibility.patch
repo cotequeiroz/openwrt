@@ -1,6 +1,24 @@
+From 06b1764c80860d3d968ae5eee96a1945c56c05c7 Mon Sep 17 00:00:00 2001
+From: Eneas U de Queiroz <cote2004-github@yahoo.com>
+Date: Fri, 15 Jun 2018 19:25:16 -0300
+Subject: [PATCH 1/3] ustream-ssl: add openssl-1.1.0 compatibility
+
+Patch to compile ustream-ssl with openssl-1.1.0, maintaining
+compatibility with openssl 1.0.2.
+
+Fixed flag handling in ustream-io-openssl.c.
+
+Signed-off-by: Eneas U de Queiroz <cote2004-github@yahoo.com>
+---
+ openssl_bio_compat.h | 33 +++++++++++++++++++++++++++++++++
+ ustream-io-openssl.c | 46 ++++++++++++++++++++++------------------------
+ ustream-openssl.c    | 30 +++++++++++++++++++-----------
+ 3 files changed, 74 insertions(+), 35 deletions(-)
+ create mode 100644 openssl_bio_compat.h
+
 diff --git a/openssl_bio_compat.h b/openssl_bio_compat.h
 new file mode 100644
-index 0000000..dedc412
+index 0000000..9355c86
 --- /dev/null
 +++ b/openssl_bio_compat.h
 @@ -0,0 +1,33 @@
@@ -38,7 +56,7 @@ index 0000000..dedc412
 +
 +#endif /* OPENSSL_BIO_COMPAT_H */
 diff --git a/ustream-io-openssl.c b/ustream-io-openssl.c
-index 6711055..aa9f401 100644
+index 6711055..606ed4a 100644
 --- a/ustream-io-openssl.c
 +++ b/ustream-io-openssl.c
 @@ -21,15 +21,15 @@
@@ -190,3 +208,6 @@ index 91bc4e8..c6839ea 100644
  	SSL_CTX_set_quiet_shutdown(c, 1);
  
  	return (void *) c;
+-- 
+2.16.4
+
