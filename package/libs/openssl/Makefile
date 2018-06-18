@@ -159,7 +159,7 @@ ifeq ($(CONFIG_x86_64),y)
   OPENSSL_TARGET:=linux-x86_64-openwrt
   OPENSSL_MAKEFLAGS += LIBDIR=lib
 else
-  OPENSSL_OPTIONS+= no-sse2
+  OPENSSL_OPTIONS+=no-sse2
   ifeq ($(CONFIG_mips)$(CONFIG_mipsel),y)
     OPENSSL_TARGET:=linux-mips32-openwrt
   else ifeq ($(CONFIG_aarch64),y)
@@ -168,7 +168,7 @@ else
     OPENSSL_TARGET:=linux-armv4-openwrt
   else
     OPENSSL_TARGET:=linux-generic-openwrt
-    OPENSSL_OPTIONS+= no-perlasm
+    OPENSSL_OPTIONS+=no-perlasm
   endif
 endif
 
