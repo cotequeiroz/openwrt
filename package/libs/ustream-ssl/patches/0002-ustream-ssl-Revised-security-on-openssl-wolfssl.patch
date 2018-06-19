@@ -90,7 +90,7 @@ index c6839ea..ffb0f3d 100644
 -	SSL_CTX_set_options (c, SSL_OP_NO_COMPRESSION); /* avoid CRIME attack */
 +	SSL_CTX_set_options(c, SSL_OP_NO_COMPRESSION | SSL_OP_SINGLE_ECDH_USE |
 +			       SSL_OP_CIPHER_SERVER_PREFERENCE);
- #if !defined(OPENSSL_NO_ECDH) && !defined(CYASSL_OPENSSL_H_) && OPENSSL_VERSION_NUMBER < 0x10100000L
+ #if defined(SSL_CTX_set_ecdh_auto) && OPENSSL_VERSION_NUMBER < 0x10100000L
  	SSL_CTX_set_ecdh_auto(c, 1);
  #endif
  	if (server) {

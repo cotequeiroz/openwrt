@@ -193,7 +193,7 @@ index 91bc4e8..c6839ea 100644
  	SSL_CTX_set_verify(c, SSL_VERIFY_NONE, NULL);
 -#if !defined(OPENSSL_NO_ECDH) && !defined(CYASSL_OPENSSL_H_)
 +	SSL_CTX_set_options (c, SSL_OP_NO_COMPRESSION); /* avoid CRIME attack */
-+#if !defined(OPENSSL_NO_ECDH) && !defined(CYASSL_OPENSSL_H_) && OPENSSL_VERSION_NUMBER < 0x10100000L
++#if defined(SSL_CTX_set_ecdh_auto) && OPENSSL_VERSION_NUMBER < 0x10100000L
  	SSL_CTX_set_ecdh_auto(c, 1);
  #endif
 -	if (server)
