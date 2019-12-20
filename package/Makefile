@@ -95,6 +95,7 @@ $(curdir)/index: FORCE
 		gzip -9nc Packages > Packages.gz; \
 	); done
 ifdef CONFIG_SIGNED_PACKAGES
+	@[ -x $(STAGING_DIR_HOST)/bin/usign ] || make -C package/system/usign host-compile
 	@echo Signing package index...
 	@for d in $(PACKAGE_SUBDIRS); do ( \
 		[ -d $$d ] && \
