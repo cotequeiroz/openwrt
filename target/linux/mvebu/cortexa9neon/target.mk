@@ -5,7 +5,7 @@
 include $(TOPDIR)/rules.mk
 
 ARCH:=arm
-BOARDNAME:=Marvell Armada 37x/XP
+BOARDNAME:=Marvell Armada 38x
 CPU_TYPE:=cortex-a9
-CPU_SUBTYPE:=vfpv3-d16
+CPU_SUBTYPE:=neon-fp16
 KERNELNAME:=zImage dtbs
