@@ -342,6 +342,7 @@ KernelPackage/crypto-ghash/imx/cortexa7=$(KernelPackage/crypto-ghash/arm-ce)
 KernelPackage/crypto-ghash/imx/cortexa9=$(KernelPackage/crypto-ghash/arm-ce)
 KernelPackage/crypto-ghash/ipq40xx=$(KernelPackage/crypto-ghash/arm-ce)
 KernelPackage/crypto-ghash/mvebu/cortexa9=$(KernelPackage/crypto-ghash/arm-ce)
+KernelPackage/crypto-ghash/mvebu/cortexa9neon=$(KernelPackage/crypto-ghash/arm-ce)
 
 $(eval $(call KernelPackage,crypto-ghash))
 
