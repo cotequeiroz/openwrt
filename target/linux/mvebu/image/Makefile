@@ -110,6 +110,7 @@ define Device/NAND-512K
 endef
 
 include cortex-a9.mk
+include cortex-a9-neon.mk
 include cortex-a53.mk
 include cortex-a72.mk
 
