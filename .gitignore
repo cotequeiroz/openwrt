@@ -30,3 +30,9 @@ git-src
 .cproject
 .ccache
 .vscode*
+
+# equeiroz
+top.sh
+acompanha.sh
+diffconfig*
+
