@@ -32,3 +32,6 @@ git-src
 .cproject
 .ccache
 .vscode*
+
+# equeiroz
+diffconfig*

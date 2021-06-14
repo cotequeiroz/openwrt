@@ -1,0 +1,62 @@
+#!/bin/bash
+
+cleanup() {
+    unset unset STAGING_DIR faketty WRT_OLDLANG WRT_OLDPATH WRT_OLDPS1
+}
+
+set_vars() {
+    WRT_OLDLANG="${LANG}"
+    WRT_OLDPATH="${PATH}"
+    WRT_OLDPS1="${PS1}"
+    local CONFIG_ARCH=$(sed -ne '/^CONFIG_ARCH=/{s/.*"\(.*\)\"/\1/; p}' .config)
+    local CONFIG_CPU_TYPE=$(sed -ne '/^CONFIG_CPU_TYPE=[^ ]\+$/{s/.*"\(.*\)\"/_\1/; p}' .config)
+    local CONFIG_GCC_VERSION=$(sed -ne '/^CONFIG_GCC_VERSION=/{s/.*"\(.*\)\"/\1/; p}' .config)
+    local CONFIG_LIBC=$(sed -ne '/^CONFIG_LIBC=/{s/.*"\(.*\)\"/\1/; p}' .config)
+    local CONFIG_TARGET_BOARD=$(sed -ne '/^CONFIG_TARGET_BOARD=/{s/.*"\(.*\)\"/\1/; p}' .config)
+    local CONFIG_TARGET_SUBTARGET=$(sed -ne '/^CONFIG_TARGET_SUBTARGET=/{s/.*"\(.*\)\"/\1/; p}' .config)
+    [ "${CONFIG_ARCH}" = arm ] && local EABI="_eabi"
+
+    { [ -z "${CONFIG_ARCH}" ] || \
+      [ -z "${CONFIG_GCC_VERSION}" ] || \
+      [ -z "${CONFIG_LIBC}" ] || \
+      [ -z "${CONFIG_TARGET_BOARD}" ] || \
+      [ -z "${CONFIG_TARGET_SUBTARGET}" ]; \
+    } && {
+	echo "Could not read target information from .config:" >&2
+	echo "CONFIG_ARCH='${CONFIG_ARCH}'" >&2
+	echo "CONFIG_CPU_TYPE='${CONFIG_CPU_TYPE}'" >&2
+	echo "CONFIG_GCC_VERSION='${CONFIG_GCC_VERSION}'" >&2
+	echo "CONFIG_LIBC='${CONFIG_LIBC}'" >&2
+	echo "CONFIG_TARGET_BOARD='${CONFIG_TARGET_BOARD}'" >&2
+	echo "CONFIG_TARGET_SUBTARGET='${CONFIG_TARGET_SUBTARGET}'" >&2
+	cleanup
+	return
+    }
+
+    local ARCH_CPU="${CONFIG_ARCH}${CONFIG_CPU_TYPE}"
+    local BOARD_SUBTARGET="${CONFIG_TARGET_BOARD}_${CONFIG_TARGET_SUBTARGET}"
+    local TARGET="${ARCH_CPU}_${CONFIG_LIBC}${EABI}"
+    local TOOLCHAIN="${ARCH_CPU}_gcc-${CONFIG_GCC_VERSION}_${CONFIG_LIBC}${EABI}"
+
+    local REAL_STAGING_DIR="$(realpath staging_dir)"
+    STAGING_DIR="${REAL_STAGING_DIR}/target-${TARGET}"
+    local TOOLCHAIN_PATH="${REAL_STAGING_DIR}/toolchain-${TOOLCHAIN}"
+
+    echo "Setting up OpenWRT environment..." >&2
+    export LANG=C
+    PS1="\[\033]0;[${ARCH_CPU}] \u@\h:\w\007\]\[\033[01;33m\][${BOARD_SUBTARGET}] \u@\h\[\033[01;34m\] \w \$\[\033[00m\] "
+    PATH="${TOOLCHAIN_PATH}/bin:${REAL_STAGING_DIR}/host/bin:${REAL_STAGING_DIR}/hostpkg/bin:${PATH}"
+    export STAGING_DIR
+    faketty() { script --return -qfc "$(printf "%q " "$@")" /dev/null ; }
+}
+
+[ -n "${WRT_OLDLANG}" ] && { LANG="${WRT_OLDLANG}"; RESTORE=1; }
+[ -n "${WRT_OLDPATH}" ] && { PATH="${WRT_OLDPATH}"; RESTORE=1; }
+[ -n "${WRT_OLDPS1}" ] && { PS1="${WRT_OLDPS1}"; RESTORE=1; }
+if [ "${RESTORE}" = 1 ]; then 
+    echo "Restoring LANG, PATH and PS1..." >&2
+    cleanup
+else
+    set_vars
+fi
+unset set_vars cleanup RESTORE
