@@ -1,0 +1,10 @@
+--- a/net/wireless/reg.c
++++ b/net/wireless/reg.c
+@@ -4083,6 +4083,7 @@ bool regulatory_pre_cac_allowed(struct w
+ 	const struct ieee80211_regdomain *wiphy_regd = NULL;
+ 	bool pre_cac_allowed = false;
+ 
++	return true;
+ 	rcu_read_lock();
+ 
+ 	regd = rcu_dereference(cfg80211_regdomain);
