@@ -1,0 +1,20 @@
+--- a/net/wireless/reg.c
++++ b/net/wireless/reg.c
+@@ -4079,6 +4079,7 @@ bool regulatory_indoor_allowed(void)
+ 
+ bool regulatory_pre_cac_allowed(struct wiphy *wiphy)
+ {
++#if 0
+ 	const struct ieee80211_regdomain *regd = NULL;
+ 	const struct ieee80211_regdomain *wiphy_regd = NULL;
+ 	bool pre_cac_allowed = false;
+@@ -4103,6 +4104,9 @@ bool regulatory_pre_cac_allowed(struct w
+ 	rcu_read_unlock();
+ 
+ 	return pre_cac_allowed;
++#else
++	return true;
++#endif
+ }
+ EXPORT_SYMBOL(regulatory_pre_cac_allowed);
+ 
