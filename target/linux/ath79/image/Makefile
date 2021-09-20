@@ -89,6 +89,11 @@ endef
 
 include $(SUBTARGET).mk
 
+ifeq ($(SUBTARGET),mips74k)
+include generic-tp-link.mk
+include generic-ubnt.mk
+endif
+
 ifeq ($(SUBTARGET),generic)
 include generic-tp-link.mk
 include generic-ubnt.mk
