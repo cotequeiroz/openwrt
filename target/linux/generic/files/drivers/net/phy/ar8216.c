@@ -719,8 +719,13 @@ ar8216_hw_init(struct ar8xxx_priv *priv)
 	if (priv->initialized)
 		return 0;
 
+/* There should be a proper symbol for this, but for DIR-615, which is not
+ * configured with DTS support, CONFIG_OF will suffice.
+ */
+#ifdef CONFIG_OF
 	ar8xxx_write(priv, AR8216_REG_CTRL, AR8216_CTRL_RESET);
 	ar8xxx_reg_wait(priv, AR8216_REG_CTRL, AR8216_CTRL_RESET, 0, 1000);
+#endif
 
 	ar8xxx_phy_init(priv);
 
