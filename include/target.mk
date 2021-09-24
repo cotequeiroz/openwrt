@@ -223,6 +223,7 @@ ifeq ($(DUMP),1)
     CPU_CFLAGS_24kc = -march=24kc -mtune=24kc
     CPU_CFLAGS_24kec = -march=24kec -mtune=24kec -mdsp
     CPU_CFLAGS_74kc = -march=74kc -mtune=74kc -mdspr2
+    CPU_CFLAGS_1004kc = -march=1004kc -mtune=1004kc -mdsp -mmt
     CPU_CFLAGS_octeonplus = -march=octeon+ -mabi=64
   endif
   ifeq ($(ARCH),i386)
