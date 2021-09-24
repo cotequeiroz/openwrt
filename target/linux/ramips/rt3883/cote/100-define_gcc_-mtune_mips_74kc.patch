@@ -1,0 +1,28 @@
+From: Eneas U de Queiroz <cotequeiroz@gmail.com>
+Subject: ramips: kernel: add -march=74kc to ramips/rt3883
+
+Let's squeeze every bit of performance out of the CPU.
+Note that -march=74kc does not currently work, with gas warnings like:
+
+  Warning: the `dspr2' extension requires MIPS64 revision 2 or greater
+
+even though we're not compiling for MIPS64.
+
+At least the ASUS RT-N56U does not boot with -march=74kc.
+
+Signed-off-by: Eneas U de Queiroz <cotequeiroz@gmail.com>
+---
+ arch/mips/Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+--- a/arch/mips/Makefile
++++ b/arch/mips/Makefile
+@@ -174,7 +174,7 @@ cflags-$(CONFIG_CPU_VR41XX)	+= -march=r4
+ cflags-$(CONFIG_CPU_R4X00)	+= -march=r4600 -Wa,--trap
+ cflags-$(CONFIG_CPU_TX49XX)	+= -march=r4600 -Wa,--trap
+ cflags-$(CONFIG_CPU_MIPS32_R1)	+= -march=mips32 -Wa,--trap
+-cflags-$(CONFIG_CPU_MIPS32_R2)	+= -march=mips32r2 -mtune=34kc -Wa,--trap
++cflags-$(CONFIG_CPU_MIPS32_R2)	+= -march=mips32r2 -mtune=74kc -Wa,--trap
+ cflags-$(CONFIG_CPU_MIPS32_R5)	+= -march=mips32r5 -Wa,--trap -modd-spreg
+ cflags-$(CONFIG_CPU_MIPS32_R6)	+= -march=mips32r6 -Wa,--trap -modd-spreg
+ cflags-$(CONFIG_CPU_MIPS64_R1)	+= -march=mips64 -Wa,--trap
