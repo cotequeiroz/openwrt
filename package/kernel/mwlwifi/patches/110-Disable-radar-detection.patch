@@ -1,0 +1,44 @@
+From 75ec01373316323585b76f431beeda4fd463afc8 Mon Sep 17 00:00:00 2001
+From: Eneas U de Queiroz <cotequeiroz@gmail.com>
+Date: Fri, 24 Sep 2021 12:02:41 -0300
+Subject: [PATCH] Disable radar detection
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+THIS IS NOT MEANT FOR GENERAL USE, AS IT MAY NOT COMPLY WITH LOCAL
+REGULATIONS.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+Radar detection is giving many false positives, even when used in
+frequencies outside of DFS (157, for example):
+
+kernel: [143819.986986] ieee80211 phy0: radar detected by firmware
+hostapd: wlan5g: DFS-RADAR-DETECTED freq=5765 ht_enabled=0 chan_offset=0
+chan_width=3 cf1=5775 cf2=0
+
+Since this error is caused by the internal closed-source binary
+firmware, radar detection has to be disabled to get a working AP.
+
+Signed-off-by: Eneas U de Queiroz <cotequeiroz@gmail.com>
+
+diff --git a/hif/pcie/pcie.c b/hif/pcie/pcie.c
+index ae9c3c1..a6d470f 100644
+--- a/hif/pcie/pcie.c
++++ b/hif/pcie/pcie.c
+@@ -459,7 +459,7 @@ static irqreturn_t pcie_isr(struct ieee80211_hw *hw)
+ 
+ 		if (int_status & MACREG_A2HRIC_BIT_RADAR_DETECT) {
+ 			wiphy_info(hw->wiphy, "radar detected by firmware\n");
+-			ieee80211_radar_detected(hw);
++			//ieee80211_radar_detected(hw);
+ 		}
+ 
+ 		if (int_status & MACREG_A2HRIC_BIT_QUE_EMPTY) {
+@@ -926,7 +926,7 @@ static irqreturn_t pcie_isr_ndp(struct ieee80211_hw *hw)
+ 
+ 		if (int_status & MACREG_A2HRIC_NEWDP_DFS) {
+ 			wiphy_info(hw->wiphy, "radar detected by firmware\n");
+-			ieee80211_radar_detected(hw);
++			//ieee80211_radar_detected(hw);
+ 		}
+ 
+ 		if (int_status & MACREG_A2HRIC_NEWDP_CHANNEL_SWITCH)
