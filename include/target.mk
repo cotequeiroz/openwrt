@@ -219,9 +219,9 @@ ifeq ($(DUMP),1)
     CPU_CFLAGS_mips32 = -mips32 -mtune=mips32
     CPU_CFLAGS_mips64 = -mips64 -mtune=mips64 -mabi=64
     CPU_CFLAGS_mips64r2 = -mips64r2 -mtune=mips64r2 -mabi=64
-    CPU_CFLAGS_4kec = -mips32r2 -mtune=4kec
-    CPU_CFLAGS_24kc = -mips32r2 -mtune=24kc
-    CPU_CFLAGS_74kc = -mips32r2 -mtune=74kc
+    CPU_CFLAGS_4kec = -march=4kec -mtune=4kec
+    CPU_CFLAGS_24kc = -march=24kc -mtune=24kc
+    CPU_CFLAGS_74kc = -march=74kc -mtune=74kc -mdspr2
     CPU_CFLAGS_octeonplus = -march=octeon+ -mabi=64
   endif
   ifeq ($(ARCH),i386)
