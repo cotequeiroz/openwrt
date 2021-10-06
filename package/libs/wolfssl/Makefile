@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=wolfssl
 PKG_VERSION:=4.7.0-stable
-PKG_RELEASE:=3
+PKG_RELEASE:=4
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://github.com/wolfSSL/wolfssl/archive/v$(PKG_VERSION)
@@ -56,7 +56,11 @@ define Package/libwolfssl/config
 	source "$(SOURCE)/Config.in"
 endef
 
-TARGET_CFLAGS += $(FPIC) -DFP_MAX_BITS=8192 -fomit-frame-pointer
+TARGET_CFLAGS += \
+	$(FPIC) \
+	-fomit-frame-pointer \
+	-DFP_MAX_BITS=8192 \
+	-DWOLFSSL_ALT_CERT_CHAINS
 
 # --enable-stunnel needed for OpenSSL API compatibility bits
 CONFIGURE_ARGS += \
