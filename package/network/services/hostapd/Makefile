@@ -417,6 +417,7 @@ define Package/hostapd-common
   SECTION:=net
   CATEGORY:=Network
   SUBMENU:=WirelessAPD
+  VARIANT:=common-files
 endef
 
 define Package/hostapd-utils
@@ -594,14 +595,20 @@ define Install/supplicant
 	$(INSTALL_DIR) $(1)/usr/sbin
 endef
 
-define Package/hostapd-common/install
+ifeq ($(BUILD_VARIANT),common-files)
+  Build/Prepare=
+  Build/Compile=
+  Build/Configure=
+
+  define Package/hostapd-common/install
 	$(INSTALL_DIR) $(1)/etc/capabilities $(1)/etc/rc.button $(1)/etc/hotplug.d/ieee80211 $(1)/etc/init.d $(1)/lib/netifd  $(1)/usr/share/acl.d
 	$(INSTALL_DATA) ./files/hostapd.sh $(1)/lib/netifd/hostapd.sh
 	$(INSTALL_BIN) ./files/wpad.init $(1)/etc/init.d/wpad
 	$(INSTALL_BIN) ./files/wps-hotplug.sh $(1)/etc/rc.button/wps
 	$(INSTALL_DATA) ./files/wpad_acl.json $(1)/usr/share/acl.d
 	$(INSTALL_DATA) ./files/wpad.json $(1)/etc/capabilities
-endef
+  endef
+endif
 
 define Package/hostapd/install
 	$(call Install/hostapd,$(1))
@@ -614,11 +621,13 @@ Package/hostapd-mini/install = $(Package/hostapd/install)
 Package/hostapd-openssl/install = $(Package/hostapd/install)
 Package/hostapd-wolfssl/install = $(Package/hostapd/install)
 
-ifneq ($(LOCAL_TYPE),supplicant)
-  define Package/hostapd-utils/install
+ifneq ($(BUILD_VARIANT),common-files)
+  ifneq ($(LOCAL_TYPE),supplicant)
+    define Package/hostapd-utils/install
 	$(INSTALL_DIR) $(1)/usr/sbin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/hostapd/hostapd_cli $(1)/usr/sbin/
-  endef
+    endef
+  endif
 endif
 
 define Package/wpad/install
@@ -677,6 +686,7 @@ ifeq ($(BUILD_VARIANT),supplicant-full-wolfssl)
   endef
 endif
 
+$(eval $(call BuildPackage,hostapd-common))
 $(eval $(call BuildPackage,hostapd))
 $(eval $(call BuildPackage,hostapd-basic))
 $(eval $(call BuildPackage,hostapd-basic-openssl))
@@ -703,7 +713,6 @@ $(eval $(call BuildPackage,wpa-supplicant-openssl))
 $(eval $(call BuildPackage,wpa-supplicant-wolfssl))
 $(eval $(call BuildPackage,wpa-cli))
 $(eval $(call BuildPackage,hostapd-utils))
-$(eval $(call BuildPackage,hostapd-common))
 $(eval $(call BuildPackage,eapol-test))
 $(eval $(call BuildPackage,eapol-test-openssl))
 $(eval $(call BuildPackage,eapol-test-wolfssl))
