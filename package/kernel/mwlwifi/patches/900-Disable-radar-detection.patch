@@ -20,11 +20,9 @@ firmware, radar detection has to be disabled to get a working AP.
 
 Signed-off-by: Eneas U de Queiroz <cotequeiroz@gmail.com>
 
-diff --git a/hif/pcie/pcie.c b/hif/pcie/pcie.c
-index ae9c3c1..a6d470f 100644
 --- a/hif/pcie/pcie.c
 +++ b/hif/pcie/pcie.c
-@@ -459,7 +459,7 @@ static irqreturn_t pcie_isr(struct ieee80211_hw *hw)
+@@ -457,7 +457,7 @@ static irqreturn_t pcie_isr(struct ieee8
  
  		if (int_status & MACREG_A2HRIC_BIT_RADAR_DETECT) {
  			wiphy_info(hw->wiphy, "radar detected by firmware\n");
@@ -33,7 +31,7 @@ index ae9c3c1..a6d470f 100644
  		}
  
  		if (int_status & MACREG_A2HRIC_BIT_QUE_EMPTY) {
-@@ -926,7 +926,7 @@ static irqreturn_t pcie_isr_ndp(struct ieee80211_hw *hw)
+@@ -924,7 +924,7 @@ static irqreturn_t pcie_isr_ndp(struct i
  
  		if (int_status & MACREG_A2HRIC_NEWDP_DFS) {
  			wiphy_info(hw->wiphy, "radar detected by firmware\n");

@@ -1,0 +1,332 @@
+From baa686624385657c2b74c821c89d132100213a2e Mon Sep 17 00:00:00 2001
+From: Milo Turner <mturner@starry.com>
+Date: Thu, 29 Jul 2021 10:55:47 -0400
+Subject: [PATCH] Replace all occurrences of wiphy_debug with wiphy_dbg
+
+
+diff --git a/core.c b/core.c
+index 9d2b551..a51d40b 100644
+--- a/core.c
++++ b/core.c
+@@ -148,10 +148,10 @@ static int mwl_prepare_cmd_buf(struct mwl_priv *priv)
+ 			  "cannot alloc memory for command buffer\n");
+ 		goto err;
+ 	}
+-	wiphy_debug(priv->hw->wiphy,
+-		    "priv->pcmd_buf = %p  priv->pphys_cmd_buf = %p\n",
+-		    priv->pcmd_buf,
+-		    (void *)priv->pphys_cmd_buf);
++	wiphy_dbg(priv->hw->wiphy,
++		  "priv->pcmd_buf = %p  priv->pphys_cmd_buf = %p\n",
++		  priv->pcmd_buf,
++		  (void *)priv->pphys_cmd_buf);
+ 	memset(priv->pcmd_buf, 0x00, CMD_BUF_SIZE);
+ 
+ 	return 0;
+@@ -186,16 +186,16 @@ static int mwl_init_firmware(struct mwl_priv *priv, const char *fw_name,
+ 	if (cal_name) {
+ 		if ((request_firmware((const struct firmware **)&priv->cal_data,
+ 		     cal_name, priv->dev)) < 0)
+-			wiphy_debug(priv->hw->wiphy,
+-				    "cannot find calibtration data\n");
++			wiphy_dbg(priv->hw->wiphy,
++				  "cannot find calibtration data\n");
+ 	}
+ 
+ 	if (txpwrlmt_name) {
+ 		if ((request_firmware(
+ 		     (const struct firmware **)&priv->txpwrlmt_file,
+ 		     txpwrlmt_name, priv->dev)) < 0)
+-			wiphy_debug(priv->hw->wiphy,
+-				    "cannot find tx power limit data\n");
++			wiphy_dbg(priv->hw->wiphy,
++				  "cannot find tx power limit data\n");
+ 	}
+ 
+ 	return rc;
+@@ -347,7 +347,7 @@ static void mwl_reg_notifier(struct wiphy *wiphy,
+ 			}
+ 
+ 			/* Dump loaded power tabel */
+-			wiphy_debug(hw->wiphy, "regdomain: %s\n", prop->name);
++			wiphy_dbg(hw->wiphy, "regdomain: %s\n", prop->name);
+ 			for (i = 0; i < SYSADPT_MAX_NUM_CHANNELS; i++) {
+ 				struct mwl_tx_pwr_tbl *pwr_tbl;
+ 				char disp_buf[64];
+@@ -356,12 +356,12 @@ static void mwl_reg_notifier(struct wiphy *wiphy,
+ 				pwr_tbl = &priv->tx_pwr_tbl[i];
+ 				if (pwr_tbl->channel == 0)
+ 					break;
+-				wiphy_debug(hw->wiphy,
+-					    "Channel: %d: 0x%x 0x%x 0x%x\n",
+-					    pwr_tbl->channel,
+-					    pwr_tbl->setcap,
+-					    pwr_tbl->cdd,
+-					    pwr_tbl->txantenna2);
++				wiphy_dbg(hw->wiphy,
++					  "Channel: %d: 0x%x 0x%x 0x%x\n",
++					  pwr_tbl->channel,
++					  pwr_tbl->setcap,
++					  pwr_tbl->cdd,
++					  pwr_tbl->txantenna2);
+ 				disp_ptr = disp_buf;
+ 				for (j = 0; j < SYSADPT_TX_POWER_LEVEL_TOTAL;
+ 				     j++) {
+@@ -369,7 +369,7 @@ static void mwl_reg_notifier(struct wiphy *wiphy,
+ 						sprintf(disp_ptr, "%x ",
+ 							pwr_tbl->tx_power[j]);
+ 				}
+-				wiphy_debug(hw->wiphy, "%s\n", disp_buf);
++				wiphy_dbg(hw->wiphy, "%s\n", disp_buf);
+ 			}
+ 		}
+ 	}
+diff --git a/hif/fwcmd.c b/hif/fwcmd.c
+index ff943d6..f39321f 100644
+--- a/hif/fwcmd.c
++++ b/hif/fwcmd.c
+@@ -939,7 +939,7 @@ const struct hostcmd_get_hw_spec
+ 
+ 	mutex_lock(&priv->fwcmd_mutex);
+ 
+-	wiphy_debug(hw->wiphy, "pcmd = %p\n", pcmd);
++	wiphy_dbg(hw->wiphy, "pcmd = %p\n", pcmd);
+ 	memset(pcmd, 0x00, sizeof(*pcmd));
+ 	eth_broadcast_addr(pcmd->hw_spec.permanent_addr);
+ 	pcmd->cmd_hdr.cmd = cpu_to_le16(HOSTCMD_CMD_GET_HW_SPEC);
+@@ -955,8 +955,8 @@ const struct hostcmd_get_hw_spec
+ 		}
+ 
+ 		msleep(1000);
+-		wiphy_debug(hw->wiphy,
+-			    "repeat command = %p\n", pcmd);
++		wiphy_dbg(hw->wiphy,
++			  "repeat command = %p\n", pcmd);
+ 	}
+ 
+ 	mutex_unlock(&priv->fwcmd_mutex);
+@@ -3613,8 +3613,8 @@ int mwl_fwcmd_set_slot_time(struct ieee80211_hw *hw, bool short_slot)
+ 	struct mwl_priv *priv = hw->priv;
+ 	struct hostcmd_cmd_802_11_slot_time *pcmd;
+ 
+-	wiphy_debug(priv->hw->wiphy, "%s(): short_slot_time=%d\n",
+-		    __func__, short_slot);
++	wiphy_dbg(priv->hw->wiphy, "%s(): short_slot_time=%d\n",
++		  __func__, short_slot);
+ 
+ 	pcmd = (struct hostcmd_cmd_802_11_slot_time *)&priv->pcmd_buf[0];
+ 
+@@ -3794,8 +3794,8 @@ int mwl_fwcmd_get_txpwrlmt_cfg_data(struct ieee80211_hw *hw)
+ 		subband_len = le16_to_cpu(pcmd->cmd_hdr.len) -
+ 			sizeof(struct hostcmd_header) - 2;
+ 		if (total_len <= SYSADPT_TXPWRLMT_CFG_BUF_SIZE) {
+-			wiphy_debug(hw->wiphy, "Subband len = %d\n",
+-				    subband_len);
++			wiphy_dbg(hw->wiphy, "Subband len = %d\n",
++				  subband_len);
+ 			memcpy(priv->txpwrlmt_data.buf + total_len,
+ 			       &pcmd->subband_id, subband_len);
+ 			total_len += subband_len;
+diff --git a/hif/pcie/dev.h b/hif/pcie/dev.h
+index 2c26bff..256d84d 100644
+--- a/hif/pcie/dev.h
++++ b/hif/pcie/dev.h
+@@ -757,8 +757,8 @@ static inline void pcie_tx_add_dma_header(struct mwl_priv *priv,
+ 	if (hdrlen != reqd_hdrlen) {
+ 		needed_room = reqd_hdrlen - hdrlen;
+ 		if (skb_headroom(skb) < needed_room) {
+-			wiphy_debug(priv->hw->wiphy, "headroom is short: %d %d",
+-				    skb_headroom(skb), needed_room);
++			wiphy_dbg(priv->hw->wiphy, "headroom is short: %d %d",
++				  skb_headroom(skb), needed_room);
+ 			skb_cow(skb, needed_room);
+ 		}
+ 		skb_push(skb, needed_room);
+diff --git a/hif/pcie/fwdl.c b/hif/pcie/fwdl.c
+index 939ed54..9399c32 100644
+--- a/hif/pcie/fwdl.c
++++ b/hif/pcie/fwdl.c
+@@ -51,7 +51,7 @@ static bool pcie_download_ddr_init(struct mwl_priv *priv)
+ 	u32 len = 0;
+ 
+ 	/* download ddr init code */
+-	wiphy_debug(priv->hw->wiphy, "ddr init: download start\n");
++	wiphy_dbg(priv->hw->wiphy, "ddr init: download start\n");
+ 
+ 	while (size_ddr_init_downloaded < size_ddr_init) {
+ 		len = readl(pcie_priv->iobase1 + 0xc40);
+@@ -105,7 +105,7 @@ static bool pcie_download_ddr_init(struct mwl_priv *priv)
+ 		size_ddr_init_downloaded += len;
+ 	}
+ 
+-	wiphy_debug(priv->hw->wiphy, "ddr init: download complete\n");
++	wiphy_dbg(priv->hw->wiphy, "ddr init: download complete\n");
+ 
+ 	return true;
+ }
+@@ -167,7 +167,7 @@ int pcie_download_firmware(struct ieee80211_hw *hw)
+ 	 * reside on its respective blocks such as ITCM, DTCM, SQRAM,
+ 	 * (or even DDR, AFTER DDR is init'd before fw download
+ 	 */
+-	wiphy_debug(hw->wiphy, "fw download start\n");
++	wiphy_dbg(hw->wiphy, "fw download start\n");
+ 
+ 	if (priv->chip_type != MWL8997)
+ 		/* Disable PFU before FWDL */
+@@ -231,9 +231,9 @@ int pcie_download_firmware(struct ieee80211_hw *hw)
+ 		size_fw_downloaded += len;
+ 	}
+ 
+-	wiphy_debug(hw->wiphy,
+-		    "FwSize = %d downloaded Size = %d curr_iteration %d\n",
+-		    (int)fw->size, size_fw_downloaded, curr_iteration);
++	wiphy_dbg(hw->wiphy,
++		  "FwSize = %d downloaded Size = %d curr_iteration %d\n",
++		  (int)fw->size, size_fw_downloaded, curr_iteration);
+ 
+ 	/* Now firware is downloaded successfully, so this part is to check
+ 	 * whether fw can properly execute to an extent that write back
+@@ -261,7 +261,7 @@ int pcie_download_firmware(struct ieee80211_hw *hw)
+ 		goto err_download;
+ 	}
+ 
+-	wiphy_debug(hw->wiphy, "fw download complete\n");
++	wiphy_dbg(hw->wiphy, "fw download complete\n");
+ 	writel(0x00, pcie_priv->iobase1 + MACREG_REG_INT_CODE);
+ 
+ 	return 0;
+diff --git a/hif/pcie/pcie.c b/hif/pcie/pcie.c
+index 3fbb170..6423cf4 100644
+--- a/hif/pcie/pcie.c
++++ b/hif/pcie/pcie.c
+@@ -152,8 +152,8 @@ static bool pcie_chk_adapter(struct pcie_priv *pcie_priv)
+ 	}
+ 
+ 	if (priv->cmd_timeout)
+-		wiphy_debug(priv->hw->wiphy, "MACREG_REG_INT_CODE: 0x%04x\n",
+-			    regval);
++		wiphy_dbg(priv->hw->wiphy, "MACREG_REG_INT_CODE: 0x%04x\n",
++			  regval);
+ 
+ 	return true;
+ }
+@@ -387,8 +387,8 @@ static int pcie_exec_cmd(struct ieee80211_hw *hw, unsigned short cmd)
+ 	if (!priv->in_send_cmd && !priv->rmmod) {
+ 		priv->in_send_cmd = true;
+ 		if (priv->dump_hostcmd)
+-			wiphy_debug(priv->hw->wiphy, "send cmd 0x%04x=%s\n",
+-				    cmd, mwl_fwcmd_get_cmd_string(cmd));
++			wiphy_dbg(priv->hw->wiphy, "send cmd 0x%04x=%s\n",
++				  cmd, mwl_fwcmd_get_cmd_string(cmd));
+ 		pcie_send_cmd(pcie_priv);
+ 		if (pcie_wait_complete(priv, 0x8000 | cmd)) {
+ 			wiphy_err(priv->hw->wiphy, "timeout: 0x%04x\n", cmd);
+@@ -554,7 +554,7 @@ static void pcie_timer_routine(struct ieee80211_hw *hw)
+ 	if (ba_full && rm_stream) {
+ 		ieee80211_stop_tx_ba_session(rm_stream->sta,
+ 					     rm_stream->tid);
+-		wiphy_debug(hw->wiphy, "Stop BA %pM\n", rm_stream->sta->addr);
++		wiphy_dbg(hw->wiphy, "Stop BA %pM\n", rm_stream->sta->addr);
+ 	}
+ 	spin_unlock_bh(&priv->stream_lock);
+ }
+diff --git a/hif/pcie/rx.c b/hif/pcie/rx.c
+index 25076c6..be18a0b 100644
+--- a/hif/pcie/rx.c
++++ b/hif/pcie/rx.c
+@@ -161,12 +161,12 @@ static void pcie_rx_ring_cleanup(struct mwl_priv *priv)
+ 
+ 			dev_kfree_skb_any(rx_hndl->psk_buff);
+ 
+-			wiphy_debug(priv->hw->wiphy,
+-				    "unmapped+free'd %i 0x%p 0x%x %i\n",
+-				    i, rx_hndl->psk_buff->data,
+-				    le32_to_cpu(
+-				    rx_hndl->pdesc->pphys_buff_data),
+-				    desc->rx_buf_size);
++			wiphy_dbg(priv->hw->wiphy,
++				  "unmapped+free'd %i 0x%p 0x%x %i\n",
++				  i, rx_hndl->psk_buff->data,
++				  le32_to_cpu(
++				  rx_hndl->pdesc->pphys_buff_data),
++				  desc->rx_buf_size);
+ 
+ 			rx_hndl->psk_buff = NULL;
+ 		}
+diff --git a/hif/pcie/rx_ndp.c b/hif/pcie/rx_ndp.c
+index d1ede58..721d791 100644
+--- a/hif/pcie/rx_ndp.c
++++ b/hif/pcie/rx_ndp.c
+@@ -546,9 +546,9 @@ recheck:
+ 		case RXRING_CASE_DROP:
+ 		case RXRING_CASE_SLOW_BAD_PN:
+ 			if (ctrl_case == RXRING_CASE_SLOW_DEL_DONE) {
+-				wiphy_debug(hw->wiphy,
+-					    "staid %d deleted\n",
+-					    stnid);
++				wiphy_dbg(hw->wiphy,
++					  "staid %d deleted\n",
++					  stnid);
+ 				utils_free_stnid(priv, stnid);
+ 			}
+ 			dev_kfree_skb_any(psk_buff);
+diff --git a/hif/pcie/tx.c b/hif/pcie/tx.c
+index dd77589..db8f3a1 100644
+--- a/hif/pcie/tx.c
++++ b/hif/pcie/tx.c
+@@ -241,12 +241,12 @@ static void pcie_tx_ring_cleanup(struct mwl_priv *priv)
+ 				if (!desc->tx_hndl[i].psk_buff)
+ 					continue;
+ 
+-				wiphy_debug(priv->hw->wiphy,
+-					    "unmapped and free'd %i %p %x\n",
+-					    i,
+-					    desc->tx_hndl[i].psk_buff->data,
+-					    le32_to_cpu(
+-					    desc->ptx_ring[i].pkt_ptr));
++				wiphy_dbg(priv->hw->wiphy,
++					  "unmapped and free'd %i %p %x\n",
++					  i,
++					  desc->tx_hndl[i].psk_buff->data,
++					  le32_to_cpu(
++					  desc->ptx_ring[i].pkt_ptr));
+ 				pci_unmap_single(pcie_priv->pdev,
+ 						 le32_to_cpu(
+ 						 desc->ptx_ring[i].pkt_ptr),
+@@ -1239,8 +1239,8 @@ void pcie_tx_xmit(struct ieee80211_hw *hw,
+ 		if (rc)
+ 			mwl_fwcmd_remove_stream(hw, stream);
+ 		else
+-			wiphy_debug(hw->wiphy, "Mac80211 start BA %pM\n",
+-				    stream->sta->addr);
++			wiphy_dbg(hw->wiphy, "Mac80211 start BA %pM\n",
++				  stream->sta->addr);
+ 		spin_unlock_bh(&priv->stream_lock);
+ 	}
+ }
+diff --git a/mac80211.c b/mac80211.c
+index 725dec0..55b3ef0 100644
+--- a/mac80211.c
++++ b/mac80211.c
+@@ -295,7 +295,7 @@ static int mwl_mac80211_config(struct ieee80211_hw *hw,
+ 	struct ieee80211_conf *conf = &hw->conf;
+ 	int rc;
+ 
+-	wiphy_debug(hw->wiphy, "change: 0x%x\n", changed);
++	wiphy_dbg(hw->wiphy, "change: 0x%x\n", changed);
+ 
+ 	if (conf->flags & IEEE80211_CONF_IDLE)
+ 		rc = mwl_fwcmd_radio_disable(hw);
+diff --git a/vendor_cmd.c b/vendor_cmd.c
+index d4948e4..36cf295 100644
+--- a/vendor_cmd.c
++++ b/vendor_cmd.c
+@@ -57,7 +57,7 @@ static int mwl_vendor_cmd_set_bf_type(struct wiphy *wiphy,
+ 	val = nla_get_u8(tb[MWL_VENDOR_ATTR_BF_TYPE]);
+ 	if ((val < TXBF_MODE_OFF) || (val > TXBF_MODE_BFMER_AUTO))
+ 		return -EINVAL;
+-	wiphy_debug(wiphy, "set bf_type: 0x%x\n", val);
++	wiphy_dbg(wiphy, "set bf_type: 0x%x\n", val);
+ 
+ 	rc = mwl_fwcmd_set_bftype(hw, val);
+ 	if (!rc)
