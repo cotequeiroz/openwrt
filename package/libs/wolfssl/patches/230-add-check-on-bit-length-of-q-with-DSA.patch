@@ -1,0 +1,50 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Jacob Barthelmeh <jacob@wolfssl.com>
+Date: Mon, 11 Oct 2021 09:52:57 -0600
+Subject: [PATCH] add check on bit length of q with DSA
+
+(cherry picked from commit 63c9fa7a37c939c6f84202b5f1069f98ccc819d0)
+[Adjusted variable name]
+Signed-off-by: Eneas U de Queiroz <cotequeiroz@gmail.com>
+
+diff --git a/tests/api.c b/tests/api.c
+index 72bfc9aae..b5d30c50a 100644
+--- a/tests/api.c
++++ b/tests/api.c
+@@ -16431,6 +16431,13 @@ static int test_wc_DsaSignVerify (void)
+         }
+     }
+ 
++#if !defined(HAVE_FIPS) && defined(WOLFSSL_PUBLIC_MP)
++    /* hard set q to 0 and test fail case */
++    mp_free(&key.q);
++    mp_init(&key.q);
++    AssertIntEQ(wc_DsaSign(hash, signature, &key, &rng), BAD_FUNC_ARG);
++#endif
++
+     if (wc_FreeRng(&rng) && ret == 0) {
+         ret = WOLFSSL_FATAL_ERROR;
+     }
+diff --git a/wolfcrypt/src/dsa.c b/wolfcrypt/src/dsa.c
+index dbfa010ef..928ffcf87 100644
+--- a/wolfcrypt/src/dsa.c
++++ b/wolfcrypt/src/dsa.c
+@@ -724,6 +724,18 @@ int wc_DsaSign(const byte* digest, byte* out, DsaKey* key, WC_RNG* rng)
+         }
+ 
+         sz = min(DSA_HALF_SIZE, mp_unsigned_bin_size(&key->q));
++        /* NIST FIPS 186-4: Sections 4.1
++         * q is a prime divisor where 2^(N-1) < q < 2^N and N is the bit length
++         * of q.
++         * To satisfy this constraint if N is 0 then q would still need to be
++         * larger than 0.5, but since there is 0 bits in q it can not be any
++         * value.
++         */
++        if (sz == 0) {
++            ret = BAD_FUNC_ARG;
++            break;
++        }
++
+         tmp = out;
+         qMinus1 = kInv;
+ 
