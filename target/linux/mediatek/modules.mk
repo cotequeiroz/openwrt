@@ -41,7 +41,7 @@ $(eval $(call KernelPackage,sdhci-mtk))
 
 define KernelPackage/crypto-hw-mtk
   TITLE:= MediaTek's Crypto Engine module
-  DEPENDS:=@TARGET_mediatek
+  DEPENDS:=@TARGET_mediatek @arm
   KCONFIG:= \
 	CONFIG_CRYPTO_HW=y \
 	CONFIG_CRYPTO_AES=y \
