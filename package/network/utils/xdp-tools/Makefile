@@ -77,6 +77,7 @@ define Package/xdpdump/description
 xdpdump - a simple tcpdump like tool for capturing packets at the XDP layer
 endef
 
+TARGET_CFLAGS += -Wno-error=maybe-uninitialized
 TARGET_LDFLAGS += $(INTL_LDFLAGS)
 
 CONFIGURE_VARS += \
@@ -92,6 +93,10 @@ MAKE_VARS += \
 	BPF_CFLAGS="-I$(STAGING_DIR)/bpf-headers/tools/lib/" \
 	PREFIX=/usr \
 	RUNDIR=/tmp/run
+
+ifneq ($(findstring c,$(OPENWRT_VERBOSE)),)
+	MAKE_FLAGS += V=1
+endif
 
 define Build/InstallDev
 	$(INSTALL_DIR) $(1)/usr/include/xdp
