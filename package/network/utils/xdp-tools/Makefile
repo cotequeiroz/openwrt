@@ -77,6 +77,7 @@ define Package/xdpdump/description
 xdpdump - a simple tcpdump like tool for capturing packets at the XDP layer
 endef
 
+TARGET_CFLAGS += -Wno-error=maybe-uninitialized
 TARGET_LDFLAGS += $(INTL_LDFLAGS)
 
 CONFIGURE_VARS += \
