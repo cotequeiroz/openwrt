@@ -1,0 +1,10 @@
+--- a/configure.ac
++++ b/configure.ac
+@@ -2312,6 +2312,7 @@ if test -z "$ssl_backends" -o "x$OPT_WOL
+    They are set up properly later if it is detected.  */
+ #undef SIZEOF_LONG
+ #undef SIZEOF_LONG_LONG
++#include <cyassl/options.h>
+ #include <cyassl/ssl.h>
+ 	]],[[
+ 	  return CyaSSL_Init();
