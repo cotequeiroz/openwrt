@@ -1267,11 +1267,13 @@ define KernelPackage/rxrpc
   KCONFIG:= \
 	CONFIG_AF_RXRPC \
 	CONFIG_RXKAD=m \
-	CONFIG_AF_RXRPC_DEBUG=n
+	CONFIG_AF_RXRPC_DEBUG=n \
+	CONFIG_DEFAULT_FQ_PIE=n
   FILES:= \
 	$(LINUX_DIR)/net/rxrpc/rxrpc.ko
   AUTOLOAD:=$(call AutoLoad,30,rxrpc.ko)
-  DEPENDS:= +kmod-crypto-manager +kmod-crypto-pcbc +kmod-crypto-fcrypt
+  DEPENDS:= +kmod-crypto-manager +kmod-crypto-pcbc +kmod-crypto-fcrypt \
+	    +kmod-udptunnel4 +IPV6:kmod-udptunnel6
 endef
 
 define KernelPackage/rxrpc/description
