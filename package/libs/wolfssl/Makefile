@@ -83,7 +83,7 @@ define Package/libwolfsslcpu-crypto
 $(call Package/libwolfssl/Default)
   TITLE:=wolfSSL library with AES CPU instructions
   PROVIDES:=libwolfssl libcyassl
-  DEPENDS:=@((aarch64||x86_64)&&(m||!TARGET_bcm27xx))
+  DEPENDS:=@((aarch64||x86_64)&&(m||!TARGET_bcm27xx)) +aarch64:base-files
   ABI_VERSION:=$(PKG_ABI_VERSION)
   VARIANT:=cpu-crypto
 endef
@@ -164,7 +164,7 @@ else ifdef CONFIG_aarch64
     Package/libwolfsslcpu-crypto/preinst=\
 	$(subst @@WOLFSSL_NOASM_REGEX@@,$(WOLFSSL_NOASM_REGEX),$(file <preinst.arm-ce))
 else ifdef CONFIG_TARGET_x86_64
-	CONFIGURE_ARGS += --enable-intelasm
+    CONFIGURE_ARGS += --enable-intelasm
 endif
 
 ifeq ($(CONFIG_WOLFSSL_HAS_OCSP),y)
