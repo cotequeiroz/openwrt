@@ -1,0 +1,35 @@
+From 8687648530b0f670360cc99581c6ac6cc5b43b01 Mon Sep 17 00:00:00 2001
+From: Eneas U de Queiroz <cotequeiroz@gmail.com>
+Date: Thu, 29 Sep 2022 15:37:17 -0300
+Subject: [PATCH 2/4] libopkg: pkg_hash: bump score of packages in cli
+
+When resolving dependencies, packages whose names are listed in the cli
+should have a higher priority over other packages picked from the feeds.
+Right now a package from the feeds with the same name as the dependency
+is given the same score as one present in the cli.  The one looked at
+last would be chosen, which is not ideal.
+
+Since packages in the command line are going to be installed anyway,
+they should have a higher priority over new ones.
+
+Signed-off-by: Eneas U de Queiroz <cotequeiroz@gmail.com>
+---
+ libopkg/pkg_hash.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/libopkg/pkg_hash.c b/libopkg/pkg_hash.c
+index 482efb8..f3fb0c6 100644
+--- a/libopkg/pkg_hash.c
++++ b/libopkg/pkg_hash.c
+@@ -427,7 +427,7 @@ pkg_t *pkg_hash_fetch_best_installation_candidate(abstract_pkg_t * apkg,
+ 
+ 			for (j = 0; j < opkg_cli_argc; ++j) {
+ 				if (!strcmp(matching->name, opkg_cli_argv[j])) {
+-					score++;
++					score += 2;
+ 					break;
+ 				}
+ 			}
+-- 
+2.35.1
+
