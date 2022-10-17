@@ -1,0 +1,57 @@
+From 77f27b3aa44c1fb2250db809938c3654f690d26d Mon Sep 17 00:00:00 2001
+From: Eneas U de Queiroz <cotequeiroz@gmail.com>
+Date: Thu, 29 Sep 2022 15:37:17 -0300
+Subject: [PATCH 1/4] libopkg: pkg_hash: restore picked by hand priority
+
+Historically, package archives that are provided in the cli were given
+priority over any version from the feeds to satisfy dependencies.
+
+However, when a score was introduced in 5936c4f (libopkg: pkg_hash:
+prefer original packages to satisfy dependencies), it would only look at
+the flag if the package had the highest score at the time it was being
+assessed.
+
+While one can argue that the intention of the change was to superseed
+the by-hand priority, it would still be depended on the order in which
+they packages were checked, which is not good.
+
+Perform the "by-hand" check first, and only then go through the score
+system.  Add a logging message to show the reason.
+
+Signed-off-by: Eneas U de Queiroz <cotequeiroz@gmail.com>
+---
+ libopkg/pkg_hash.c | 11 ++++++++---
+ 1 file changed, 8 insertions(+), 3 deletions(-)
+
+diff --git a/libopkg/pkg_hash.c b/libopkg/pkg_hash.c
+index 11b1a06..482efb8 100644
+--- a/libopkg/pkg_hash.c
++++ b/libopkg/pkg_hash.c
+@@ -414,6 +414,14 @@ pkg_t *pkg_hash_fetch_best_installation_candidate(abstract_pkg_t * apkg,
+ 		pkg_t *matching = matching_pkgs->pkgs[i];
+ 		if (constraint_fcn(matching, cdata)) {
+ 			int score = 1;
++			/* It has been provided by hand, so it is what user want */
++			if (matching->provided_by_hand == 1) {
++				good_pkg_by_name = matching;
++				opkg_msg(DEBUG, "Candidate: %s %s (picked by hand).\n",
++					 matching->name, pkg_get_string(matching, PKG_VERSION));
++				break;
++			}
++
+ 			if (strcmp(matching->name, apkg->name) == 0)
+ 				score++;
+ 
+@@ -432,9 +440,6 @@ pkg_t *pkg_hash_fetch_best_installation_candidate(abstract_pkg_t * apkg,
+ 
+ 			good_pkg_by_name = matching;
+ 			good_pkg_score = score;
+-			/* It has been provided by hand, so it is what user want */
+-			if (matching->provided_by_hand == 1)
+-				break;
+ 		}
+ 	}
+ 
+-- 
+2.35.1
+
