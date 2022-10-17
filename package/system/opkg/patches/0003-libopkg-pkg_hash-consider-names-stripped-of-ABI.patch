@@ -1,0 +1,77 @@
+From 97346a2566f60c78caf778481858a1a76e2a064b Mon Sep 17 00:00:00 2001
+From: Eneas U de Queiroz <cotequeiroz@gmail.com>
+Date: Thu, 29 Sep 2022 15:37:17 -0300
+Subject: [PATCH 3/4] libopkg: pkg_hash: consider names stripped of ABI
+
+When resolving dependencies, packages listed in the cli may not have
+the ABI version, and they should have a higher priority over anything
+picked automatically.
+
+Use powers of two when computing the score to avoid ties due to
+different criteria, and so that it reflects what was matched.
+
+The resulting priorities after this change are:
+ - base score is 0
+ === USER CHOICE CRITERIA ====
+ - packages "picked by hand" (local file given in the cli) have absolute
+   priority, ending the search regardless of score
+ - package whose full name is in the cli: score += 4
+ - package whose name stripped of ABI matches one in the cli: score += 2
+ === DEVELOPER CRITERIA ====
+ - package whose full name matches the dependency name: score += 1
+ - in case of a tie, the last package that was looked at is chosen
+
+Signed-off-by: Eneas U de Queiroz <cotequeiroz@gmail.com>
+---
+ libopkg/pkg_hash.c | 19 ++++++++++++++++++-
+ 1 file changed, 18 insertions(+), 1 deletion(-)
+
+diff --git a/libopkg/pkg_hash.c b/libopkg/pkg_hash.c
+index f3fb0c6..681e7c8 100644
+--- a/libopkg/pkg_hash.c
++++ b/libopkg/pkg_hash.c
+@@ -413,7 +413,11 @@ pkg_t *pkg_hash_fetch_best_installation_candidate(abstract_pkg_t * apkg,
+ 	for (i = 0; i < matching_pkgs->len; i++) {
+ 		pkg_t *matching = matching_pkgs->pkgs[i];
+ 		if (constraint_fcn(matching, cdata)) {
+-			int score = 1;
++			int score = 0;
++			char *stripped_name = NULL;
++			const char *abiver;
++			size_t abilen, namelen;
++
+ 			/* It has been provided by hand, so it is what user want */
+ 			if (matching->provided_by_hand == 1) {
+ 				good_pkg_by_name = matching;
+@@ -422,15 +426,28 @@ pkg_t *pkg_hash_fetch_best_installation_candidate(abstract_pkg_t * apkg,
+ 				break;
+ 			}
+ 
++			if ((abiver = pkg_get_string(matching, PKG_ABIVERSION)) &&
++			    ((namelen = strlen(matching->name))) > ((abilen = strlen(abiver))) &&
++			    !strncmp(matching->name + namelen - abilen, abiver, abilen) &&
++			    !(stripped_name = strndup(matching->name, namelen - abilen))) {
++				fprintf (stderr, "Out of memory.\n");
++				exit(EXIT_FAILURE);
++			}
++
+ 			if (strcmp(matching->name, apkg->name) == 0)
+ 				score++;
+ 
+ 			for (j = 0; j < opkg_cli_argc; ++j) {
+ 				if (!strcmp(matching->name, opkg_cli_argv[j])) {
++					score += 4;
++					break;
++				} else if (stripped_name &&
++					   !strcmp(stripped_name, opkg_cli_argv[j])) {
+ 					score += 2;
+ 					break;
+ 				}
+ 			}
++			free(stripped_name);
+ 
+ 			opkg_msg(DEBUG, "Candidate: %s %s (score %d).\n",
+ 				 matching->name, pkg_get_string(matching, PKG_VERSION),
+-- 
+2.35.1
+
