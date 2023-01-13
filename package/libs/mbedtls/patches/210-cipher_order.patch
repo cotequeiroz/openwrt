@@ -1,0 +1,82 @@
+--- a/library/ecp.c
++++ b/library/ecp.c
+@@ -514,13 +514,17 @@ int mbedtls_ecp_check_budget( const mbed
+  *
+  * Reminder: update profiles in x509_crt.c when adding a new curves!
+  */
++/* Changed order so that >256-bit curves are sorted from smallest to largest */
+ static const mbedtls_ecp_curve_info ecp_supported_curves[] =
+ {
+-#if defined(MBEDTLS_ECP_DP_SECP521R1_ENABLED)
+-    { MBEDTLS_ECP_DP_SECP521R1,    25,     521,    "secp521r1"         },
++#if defined(MBEDTLS_ECP_DP_SECP256R1_ENABLED)
++    { MBEDTLS_ECP_DP_SECP256R1,    23,     256,    "secp256r1"         },
+ #endif
+-#if defined(MBEDTLS_ECP_DP_BP512R1_ENABLED)
+-    { MBEDTLS_ECP_DP_BP512R1,      28,     512,    "brainpoolP512r1"   },
++#if defined(MBEDTLS_ECP_DP_SECP256K1_ENABLED)
++    { MBEDTLS_ECP_DP_SECP256K1,    22,     256,    "secp256k1"         },
++#endif
++#if defined(MBEDTLS_ECP_DP_BP256R1_ENABLED)
++    { MBEDTLS_ECP_DP_BP256R1,      26,     256,    "brainpoolP256r1"   },
+ #endif
+ #if defined(MBEDTLS_ECP_DP_SECP384R1_ENABLED)
+     { MBEDTLS_ECP_DP_SECP384R1,    24,     384,    "secp384r1"         },
+@@ -528,14 +532,11 @@ static const mbedtls_ecp_curve_info ecp_
+ #if defined(MBEDTLS_ECP_DP_BP384R1_ENABLED)
+     { MBEDTLS_ECP_DP_BP384R1,      27,     384,    "brainpoolP384r1"   },
+ #endif
+-#if defined(MBEDTLS_ECP_DP_SECP256R1_ENABLED)
+-    { MBEDTLS_ECP_DP_SECP256R1,    23,     256,    "secp256r1"         },
+-#endif
+-#if defined(MBEDTLS_ECP_DP_SECP256K1_ENABLED)
+-    { MBEDTLS_ECP_DP_SECP256K1,    22,     256,    "secp256k1"         },
++#if defined(MBEDTLS_ECP_DP_BP512R1_ENABLED)
++    { MBEDTLS_ECP_DP_BP512R1,      28,     512,    "brainpoolP512r1"   },
+ #endif
+-#if defined(MBEDTLS_ECP_DP_BP256R1_ENABLED)
+-    { MBEDTLS_ECP_DP_BP256R1,      26,     256,    "brainpoolP256r1"   },
++#if defined(MBEDTLS_ECP_DP_SECP521R1_ENABLED)
++    { MBEDTLS_ECP_DP_SECP521R1,    25,     521,    "secp521r1"         },
+ #endif
+ #if defined(MBEDTLS_ECP_DP_SECP224R1_ENABLED)
+     { MBEDTLS_ECP_DP_SECP224R1,    21,     224,    "secp224r1"         },
+--- a/library/ssl_ciphersuites.c
++++ b/library/ssl_ciphersuites.c
+@@ -56,15 +56,19 @@ static const int ciphersuite_preference[
+ #if defined(MBEDTLS_SSL_CIPHERSUITES)
+     MBEDTLS_SSL_CIPHERSUITES,
+ #else
+-    /* Chacha-Poly ephemeral suites */
+-    MBEDTLS_TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
++    /* Bump Mozilla Intermediate compatibility list ahead of the rest.
++     * Prefer Chacha-Poly over AES, though */
+     MBEDTLS_TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
+-    MBEDTLS_TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
+-
+-    /* All AES-256 ephemeral suites */
++    MBEDTLS_TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
++    MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
++    MBEDTLS_TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+     MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+     MBEDTLS_TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
++    MBEDTLS_TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
++    MBEDTLS_TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,
+     MBEDTLS_TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,
++
++    /* Remaining AES-256 ephemeral suites */
+     MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_256_CCM,
+     MBEDTLS_TLS_DHE_RSA_WITH_AES_256_CCM,
+     MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,
+@@ -93,10 +97,7 @@ static const int ciphersuite_preference[
+     MBEDTLS_TLS_ECDHE_RSA_WITH_ARIA_256_CBC_SHA384,
+     MBEDTLS_TLS_DHE_RSA_WITH_ARIA_256_CBC_SHA384,
+ 
+-    /* All AES-128 ephemeral suites */
+-    MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+-    MBEDTLS_TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+-    MBEDTLS_TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,
++    /* Remaining AES-128 ephemeral suites */
+     MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_128_CCM,
+     MBEDTLS_TLS_DHE_RSA_WITH_AES_128_CCM,
+     MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
