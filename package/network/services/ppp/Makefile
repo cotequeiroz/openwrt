@@ -208,8 +208,9 @@ ifdef CONFIG_USE_MUSL
 endif
 
 define Build/InstallDev
-	$(INSTALL_DIR) $(1)/usr/include
+	$(INSTALL_DIR) $(1)/usr/include/net
 	$(CP) $(PKG_INSTALL_DIR)/include/pppd $(1)/usr/include/
+	$(CP) $(PKG_BUILD_DIR)/include/net/ppp_defs.h $(1)/usr/include/net/
 endef
 
 define Package/ppp/script_install
