@@ -1,0 +1,98 @@
+--- a/library/ecp.c
++++ b/library/ecp.c
+@@ -341,13 +341,17 @@ static void mpi_free_many(mbedtls_mpi *a
+  *
+  * Reminder: update profiles in x509_crt.c and ssl_tls.c when adding a new curve!
+  */
++/* Changed order so that >256-bit curves are sorted from smallest to largest */
+ static const mbedtls_ecp_curve_info ecp_supported_curves[] =
+ {
+-#if defined(MBEDTLS_ECP_DP_SECP521R1_ENABLED)
+-    { MBEDTLS_ECP_DP_SECP521R1,    25,     521,    "secp521r1"         },
++#if defined(MBEDTLS_ECP_DP_SECP256R1_ENABLED)
++    { MBEDTLS_ECP_DP_SECP256R1,    23,     256,    "secp256r1"         },
+ #endif
+-#if defined(MBEDTLS_ECP_DP_BP512R1_ENABLED)
+-    { MBEDTLS_ECP_DP_BP512R1,      28,     512,    "brainpoolP512r1"   },
++#if defined(MBEDTLS_ECP_DP_SECP256K1_ENABLED)
++    { MBEDTLS_ECP_DP_SECP256K1,    22,     256,    "secp256k1"         },
++#endif
++#if defined(MBEDTLS_ECP_DP_BP256R1_ENABLED)
++    { MBEDTLS_ECP_DP_BP256R1,      26,     256,    "brainpoolP256r1"   },
+ #endif
+ #if defined(MBEDTLS_ECP_DP_SECP384R1_ENABLED)
+     { MBEDTLS_ECP_DP_SECP384R1,    24,     384,    "secp384r1"         },
+@@ -355,14 +359,11 @@ static const mbedtls_ecp_curve_info ecp_
+ #if defined(MBEDTLS_ECP_DP_BP384R1_ENABLED)
+     { MBEDTLS_ECP_DP_BP384R1,      27,     384,    "brainpoolP384r1"   },
+ #endif
+-#if defined(MBEDTLS_ECP_DP_SECP256R1_ENABLED)
+-    { MBEDTLS_ECP_DP_SECP256R1,    23,     256,    "secp256r1"         },
+-#endif
+-#if defined(MBEDTLS_ECP_DP_SECP256K1_ENABLED)
+-    { MBEDTLS_ECP_DP_SECP256K1,    22,     256,    "secp256k1"         },
++#if defined(MBEDTLS_ECP_DP_BP512R1_ENABLED)
++    { MBEDTLS_ECP_DP_BP512R1,      28,     512,    "brainpoolP512r1"   },
+ #endif
+-#if defined(MBEDTLS_ECP_DP_BP256R1_ENABLED)
+-    { MBEDTLS_ECP_DP_BP256R1,      26,     256,    "brainpoolP256r1"   },
++#if defined(MBEDTLS_ECP_DP_SECP521R1_ENABLED)
++    { MBEDTLS_ECP_DP_SECP521R1,    25,     521,    "secp521r1"         },
+ #endif
+ #if defined(MBEDTLS_ECP_DP_SECP224R1_ENABLED)
+     { MBEDTLS_ECP_DP_SECP224R1,    21,     224,    "secp224r1"         },
+--- a/library/ssl_ciphersuites.c
++++ b/library/ssl_ciphersuites.c
+@@ -25,6 +25,9 @@
+ /*
+  * Ordered from most preferred to least preferred in terms of security.
+  *
++ * cotequeiroz: Mozilla Intermediate compatibility list ciphersuites are bumped to the top,
++ *              but preferring Cacha-Poly over AES because of absence of HW acceleration.
++ *
+  * Current rule (except weak and null which come last):
+  * 1. By key exchange:
+  *    Forward-secure non-PSK > forward-secure PSK > ECJPAKE > other non-PSK > other PSK
+@@ -42,21 +45,24 @@ static const int ciphersuite_preference[
+ #if defined(MBEDTLS_SSL_PROTO_TLS1_3)
+     /* TLS 1.3 ciphersuites */
+     MBEDTLS_TLS1_3_CHACHA20_POLY1305_SHA256,
+-    MBEDTLS_TLS1_3_AES_256_GCM_SHA384,
+     MBEDTLS_TLS1_3_AES_128_GCM_SHA256,
++    MBEDTLS_TLS1_3_AES_256_GCM_SHA384,
+     MBEDTLS_TLS1_3_AES_128_CCM_SHA256,
+     MBEDTLS_TLS1_3_AES_128_CCM_8_SHA256,
+ #endif /* MBEDTLS_SSL_PROTO_TLS1_3 */
+ 
+-    /* Chacha-Poly ephemeral suites */
+-    MBEDTLS_TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
++    /* Mozilla Intermediate compatibility ciphersuites list. */
+     MBEDTLS_TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
+-    MBEDTLS_TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
+-
+-    /* All AES-256 ephemeral suites */
++    MBEDTLS_TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
++    MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
++    MBEDTLS_TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+     MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+     MBEDTLS_TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
++    MBEDTLS_TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
++    MBEDTLS_TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,
+     MBEDTLS_TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,
++
++    /* Remaining AES-256 ephemeral suites */
+     MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_256_CCM,
+     MBEDTLS_TLS_DHE_RSA_WITH_AES_256_CCM,
+     MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,
+@@ -85,10 +91,7 @@ static const int ciphersuite_preference[
+     MBEDTLS_TLS_ECDHE_RSA_WITH_ARIA_256_CBC_SHA384,
+     MBEDTLS_TLS_DHE_RSA_WITH_ARIA_256_CBC_SHA384,
+ 
+-    /* All AES-128 ephemeral suites */
+-    MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+-    MBEDTLS_TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+-    MBEDTLS_TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,
++    /* Remaining AES-128 ephemeral suites */
+     MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_128_CCM,
+     MBEDTLS_TLS_DHE_RSA_WITH_AES_128_CCM,
+     MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
