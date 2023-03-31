@@ -229,6 +229,10 @@ endif
 	done
 
 	$(if $(CONFIG_INCLUDE_CONFIG), \
+		{ [ ! -f $(BIN_DIR)/config.buildinfo ] || \
+		  [ ! -f $(BIN_DIR)/feeds.buildinfo ] || \
+		  [ ! -f $(BIN_DIR)/version.buildinfo ]; } && \
+			$(SUBMAKE) -C $(TOPDIR) buildinfo; \
 		echo -e "# Build configuration for board $(BOARD)/$(SUBTARGET)/$(PROFILE)\n" >$(1)/etc/build.config; \
 		cat $(BIN_DIR)/config.buildinfo >>$(1)/etc/build.config; \
 		cat $(BIN_DIR)/feeds.buildinfo >>$(1)/etc/build.feeds; \
