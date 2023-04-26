@@ -1,0 +1,39 @@
+From 20d5a0be0583775bb011c41b6c20e658cc593242 Mon Sep 17 00:00:00 2001
+From: Bryan Roessler <bryanroessler@gmail.com>
+Date: Mon, 3 Apr 2023 09:02:58 -0400
+Subject: [PATCH] wifi: mt76: mt7915: disable VHT CAP SUPP CHAN WIDTH 160Mhz
+ for mt7986
+
+Fixes buggy 802.11ax on the Redmi AX6000 when connecting to some clients.
+
+Partially reverts https://patchwork.kernel.org/project/linux-wireless/patch/20230301163739.52314-1-nbd@nbd.name/
+
+Forum thread https://forum.openwrt.org/t/802-11ax-worse-than-802-11ac-with-mt76-driver/126466
+
+Signed-off-by: Bryan Roessler <bryanroessler@gmail.com>
+---
+ mt7915/init.c | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/mt7915/init.c b/mt7915/init.c
+index b88c38278..b4f0f8aff 100644
+--- a/mt7915/init.c
++++ b/mt7915/init.c
+@@ -421,12 +421,13 @@ mt7915_init_wiphy(struct mt7915_phy *phy)
+ 		} else {
+ 			vht_cap->cap |=
+ 				IEEE80211_VHT_CAP_MAX_MPDU_LENGTH_11454 |
+-				IEEE80211_VHT_CAP_MAX_A_MPDU_LENGTH_EXPONENT_MASK;
++				IEEE80211_VHT_CAP_MAX_A_MPDU_LENGTH_EXPONENT_MASK |
++				IEEE80211_VHT_CAP_SHORT_GI_160;
+ 
+ 			/* mt7916 dbdc with 2g 2x2 bw40 and 5g 2x2 bw160c */
+-			vht_cap->cap |=
+-				IEEE80211_VHT_CAP_SHORT_GI_160 |
+-				IEEE80211_VHT_CAP_SUPP_CHAN_WIDTH_160MHZ;
++			if (is_mt7916(&dev->mt76))
++				vht_cap->cap |=
++					IEEE80211_VHT_CAP_SUPP_CHAN_WIDTH_160MHZ;
+ 		}
+ 
+ 		if (!is_mt7915(&dev->mt76) || !dev->dbdc_support)
