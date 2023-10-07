@@ -392,6 +392,6 @@ define KernelPackage/cfg80211/install
 	$(INSTALL_DATA) ./files/mac80211.hotplug $(1)/etc/hotplug.d/ieee80211/10-wifi-detect
 endef
 
-$(eval $(foreach drv,$(PKG_DRIVERS),$(call KernelPackage,$(drv))))
 $(eval $(call KernelPackage,cfg80211))
 $(eval $(call KernelPackage,mac80211))
+$(eval $(foreach drv,$(PKG_DRIVERS),$(call KernelPackage,$(drv))))
