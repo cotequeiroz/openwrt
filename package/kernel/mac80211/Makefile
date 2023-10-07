@@ -384,6 +384,6 @@ define Build/InstallDev
 endef
 
 
-$(eval $(foreach drv,$(PKG_DRIVERS),$(call KernelPackage,$(drv))))
 $(eval $(call KernelPackage,cfg80211))
 $(eval $(call KernelPackage,mac80211))
+$(eval $(foreach drv,$(PKG_DRIVERS),$(call KernelPackage,$(drv))))
