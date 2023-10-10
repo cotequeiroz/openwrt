@@ -48,7 +48,16 @@ define KernelPackage/mac80211/Default
   MAINTAINER:=Felix Fietkau <nbd@nbd.name>
 endef
 
-config_package=$(if $(CONFIG_PACKAGE_kmod-$(1)),m)
+$(info BUILD_VARIANT='$(BUILD_VARIANT)')
+$(info ALL_VARIANTS='$(ALL_VARIANTS)')
+$(info ifeq ($$(BUILD_VARIANT),$$(if $$(ALL_VARIANTS),$$(firstword $$(ALL_VARIANTS)),$$(BUILD_VARIANT)))=ifeq ($(BUILD_VARIANT),$(if $(ALL_VARIANTS),$(firstword $(ALL_VARIANTS)),$(BUILD_VARIANT))))
+FIRST_BUILD=$(if $(ALL_VARIANTS),$(firstword $(ALL_VARIANTS)),$(BUILD_VARIANT))
+
+# 1 = OpenWrt KernelPackage name
+# 2 = Optional list of variants for which the module needs to be selected:
+#     Use $(ALL_VARIANTS) to always select it
+#     If empty, the module is built with the first variant
+config_package=$(info (config_package, $(1), $(2)))$(if $(and $(CONFIG_PACKAGE_kmod-$(1)),$(if $(ALL_VARIANTS),$(filter $(BUILD_VARIANT),$(if $(2),$(2),$(FIRST_BUILD))),no_variants)),m$(info CONFIG_PACKAGE_kmod-$(1)=m),$(info CONFIG_PACKAGE_kmod-$(1)=))
 
 config-y:= \
 	WLAN \
@@ -73,10 +82,10 @@ config-y:= \
 	WLAN_VENDOR_TI \
 	WLAN_VENDOR_ZYDAS \
 
-config-$(call config_package,cfg80211) += CFG80211
+config-$(call config_package,cfg80211,$(ALL_VARIANTS)) += CFG80211
 config-$(CONFIG_PACKAGE_CFG80211_TESTMODE) += NL80211_TESTMODE
 
-config-$(call config_package,mac80211) += MAC80211
+config-$(call config_package,mac80211,$(ALL_VARIANTS)) += MAC80211
 config-$(CONFIG_PACKAGE_MAC80211_MESH) += MAC80211_MESH
 
 include ath.mk
