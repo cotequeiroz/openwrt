@@ -48,13 +48,16 @@ define KernelPackage/mac80211/Default
   MAINTAINER:=Felix Fietkau <nbd@nbd.name>
 endef
 
-FIRST_BUILD=$(if $(ALL_VARIANTS),$(firstword $(ALL_VARIANTS)),$(BUILD_VARIANT))
-
 # 1 = OpenWrt KernelPackage name
 # 2 = Optional list of variants for which the module needs to be selected:
-#     Use $(ALL_VARIANTS) to always select it
-#     If empty, the module is built with the first variant
-config_package=$(if $(and $(CONFIG_PACKAGE_kmod-$(1)),$(if $(ALL_VARIANTS),$(filter $(BUILD_VARIANT),$(if $(2),$(2),$(FIRST_BUILD))),no_variants)),m)
+#     If empty, the module is only selected with the first variant
+#     Use $(ALL_VARIANTS) to allow module selection in all variants
+config_package=$(if $(and $(CONFIG_PACKAGE_kmod-$(1)),$(call mac80211_variant_check,$(2))),m)
+
+# The variant check is defined separately for readability.
+# Returning an ampty string means it should not be selected
+# 1 = list of variants for which the package is to be selected
+mac80211_variant_check=$(if $(ALL_VARIANTS),$(filter $(BUILD_VARIANT),$(if $(1),$(1),$(firstword $(ALL_VARIANTS)))),y)
 
 config-y:= \
 	WLAN \
