@@ -1,0 +1,23 @@
+From ac8400ddf6aff5db873da0acfe8b183bd6692d86 Mon Sep 17 00:00:00 2001
+From: Eneas U de Queiroz <cotequeiroz@gmail.com>
+Date: Wed, 24 Jan 2024 15:59:37 -0300
+Subject: [PATCH] SAE_PK: add missing obj files to sae_pk_gen
+
+Signed-off-by: Eneas U de Queiroz <cotequeiroz@gmail.com>
+
+--- a/hostapd/Makefile
++++ b/hostapd/Makefile
+@@ -1439,11 +1439,13 @@ ifdef CONFIG_WPA_TRACE
+ SOBJS += ../src/utils/trace.o
+ endif
+ SOBJS += ../src/common/ieee802_11_common.o
++SOBJS += ../src/common/wpa_common.o
+ SOBJS += ../src/common/sae.o
+ SOBJS += ../src/common/sae_pk.o
+ SOBJS += ../src/common/dragonfly.o
+ SOBJS += $(AESOBJS)
+ ifneq ($(CONFIG_TLS), mbedtls)
++SOBJS += ../src/crypto/sha1-prf.o
+ SOBJS += ../src/crypto/sha256-prf.o
+ SOBJS += ../src/crypto/sha384-prf.o
+ SOBJS += ../src/crypto/sha512-prf.o
