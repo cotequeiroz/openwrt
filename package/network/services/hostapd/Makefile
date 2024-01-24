@@ -100,7 +100,7 @@ ifeq ($(SSL_VARIANT),openssl)
     DRIVER_MAKEOPTS += CONFIG_AP=y CONFIG_MESH=y
   endif
   ifeq ($(LOCAL_VARIANT),full)
-    DRIVER_MAKEOPTS += CONFIG_OWE=y CONFIG_SUITEB192=y CONFIG_AP=y CONFIG_MESH=y
+    DRIVER_MAKEOPTS += CONFIG_OWE=y CONFIG_SUITEB192=y CONFIG_AP=y CONFIG_MESH=y CONFIG_SAE_PK=y CONFIG_FILS=y CONFIG_FILS_SK_PFS=y
   endif
 endif
 
@@ -173,6 +173,7 @@ $(call Package/hostapd/Default,$(1))
   TITLE+= (OpenSSL full)
   VARIANT:=full-openssl
   DEPENDS+=$(OPENSSL_DEPENDS)
+  VERSION:=$(PKG_VERSION)-6
 endef
 
 Package/hostapd-openssl/description = $(Package/hostapd/description)
@@ -280,6 +281,7 @@ $(call Package/wpad/Default,$(1))
   TITLE+= (OpenSSL full)
   VARIANT:=wpad-full-openssl
   DEPENDS+=$(OPENSSL_DEPENDS)
+  VERSION:=$(PKG_VERSION)-6
 endef
 
 Package/wpad-openssl/description = $(Package/wpad/description)
@@ -418,6 +420,7 @@ $(call Package/wpa-supplicant/Default,$(1))
   TITLE+= (OpenSSL full)
   VARIANT:=supplicant-full-openssl
   DEPENDS+=$(OPENSSL_DEPENDS)
+  VERSION:=$(PKG_VERSION)-6
 endef
 
 define Package/wpa-supplicant-wolfssl
@@ -489,6 +492,7 @@ define Package/hostapd-common
   SECTION:=net
   CATEGORY:=Network
   SUBMENU:=WirelessAPD
+  VERSION:=$(PKG_VERSION)-6
 endef
 
 define Package/hostapd-utils
@@ -536,6 +540,7 @@ define Package/eapol-test-openssl
   CONFLICTS:=$(filter-out eapol-test-openssl ,$(EAPOL_TEST_PROVIDERS))
   DEPENDS+=$(OPENSSL_DEPENDS)
   PROVIDES:=eapol-test
+  VERSION:=$(PKG_VERSION)-6
 endef
 
 define Package/eapol-test-wolfssl
