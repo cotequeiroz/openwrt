@@ -1,0 +1,16 @@
+--- a/hostapd/Makefile
++++ b/hostapd/Makefile
+@@ -16,9 +16,10 @@ endif
+ ifndef LIBS_n
+ LIBS_n := $(LIBS)
+ endif
+-ifndef LIBS_s
+-LIBS_s := $(LIBS)
+-endif
++# Hack to avoid linking unnecessary libs to sae_pk_gen
++#ifndef LIBS_s
++#LIBS_s := $(LIBS)
++#endif
+ endif
+ 
+ CFLAGS += $(EXTRA_CFLAGS)
