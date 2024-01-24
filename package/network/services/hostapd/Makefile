@@ -491,6 +491,21 @@ define Package/hostapd-common
   SUBMENU:=WirelessAPD
 endef
 
+define Package/sae_pk_gen
+  SECTION:=net
+  CATEGORY:=Network
+  SUBMENU:=WirelessAPD
+  TITLE:=SAE-PK password generator
+  URL:=http://hostap.epitest.fi/
+  DEPENDS:=+libopenssl
+  VARIANT:=full-openssl
+endef
+
+define Package/sae_pk_gen/description
+ This package contains a command line utility to generate
+ SAE-PK passwords.
+endef
+
 define Package/hostapd-utils
   SECTION:=net
   CATEGORY:=Network
@@ -560,7 +575,7 @@ endef
 ifneq ($(wildcard $(PKG_BUILD_DIR)/.config_*),$(subst .configured_,.config_,$(STAMP_CONFIGURED)))
   define Build/Configure/rebuild
 	$(FIND) $(PKG_BUILD_DIR) -name \*.o -or -name \*.a | $(XARGS) rm -f
-	rm -f $(PKG_BUILD_DIR)/hostapd/hostapd
+	rm -f $(PKG_BUILD_DIR)/hostapd/hostapd $(PKG_BUILD_DIR)/hostapd/sae_pk_gen
 	rm -f $(PKG_BUILD_DIR)/wpa_supplicant/wpa_supplicant
 	rm -f $(PKG_BUILD_DIR)/.config_*
 	touch $(subst .configured_,.config_,$(STAMP_CONFIGURED))
@@ -632,6 +647,13 @@ endef
 define Build/Compile/hostapd
 	+$(call Build/RunMake,hostapd, \
 		hostapd hostapd_cli \
+	)
+endef
+
+define Build/Compile/full-openssl
+# LIBS_s is set to empty to avoid linking unnecessary libraries
+	+$(call Build/RunMake,hostapd, \
+		sae_pk_gen LIBS_s= \
 	)
 endef
 
@@ -738,6 +760,13 @@ ifneq ($(LOCAL_TYPE),supplicant)
   endef
 endif
 
+ifeq ($(BUILD_VARIANT),full-openssl)
+  define Package/sae_pk_gen/install
+	$(INSTALL_DIR) $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/hostapd/sae_pk_gen $(1)/usr/bin/
+  endef
+endif
+
 define Package/wpad/install
 	$(call Install/hostapd,$(1))
 	$(call Install/supplicant,$(1))
@@ -818,6 +847,7 @@ $(eval $(call BuildPackage,hostapd-mini))
 $(eval $(call BuildPackage,hostapd-openssl))
 $(eval $(call BuildPackage,hostapd-wolfssl))
 $(eval $(call BuildPackage,hostapd-mbedtls))
+$(eval $(call BuildPackage,sae_pk_gen))
 $(eval $(call BuildPackage,wpad))
 $(eval $(call BuildPackage,wpad-mesh-openssl))
 $(eval $(call BuildPackage,wpad-mesh-wolfssl))
