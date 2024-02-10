@@ -6,23 +6,43 @@ Subject: [PATCHv2 601/602] wpa_supplicant: add new config params to be used
 
 Signed-hostap: Antonio Quartulli <ordex@autistici.org>
 ---
- src/drivers/driver.h            |    6 +++
- wpa_supplicant/config.c         |   96 +++++++++++++++++++++++++++++++++++++++
- wpa_supplicant/config_ssid.h    |    6 +++
- wpa_supplicant/wpa_supplicant.c |   23 +++++++---
- 4 files changed, 124 insertions(+), 7 deletions(-)
+ src/ap/sta_info.h               |  4 --
+ src/common/defs.h               |  4 ++
+ src/drivers/driver.h            |  3 ++
+ wpa_supplicant/config.c         | 94 +++++++++++++++++++++++++++++++++
+ wpa_supplicant/config_ssid.h    |  5 ++
+ wpa_supplicant/wpa_supplicant.c |  6 +++
+ 6 files changed, 112 insertions(+), 4 deletions(-)
 
+--- a/src/ap/sta_info.h
++++ b/src/ap/sta_info.h
+@@ -49,10 +49,6 @@
+ #define WLAN_STA_PENDING_DEAUTH_CB BIT(30)
+ #define WLAN_STA_NONERP BIT(31)
+ 
+-/* Maximum number of supported rates (from both Supported Rates and Extended
+- * Supported Rates IEs). */
+-#define WLAN_SUPP_RATES_MAX 32
+-
+ struct hostapd_data;
+ 
+ struct mbo_non_pref_chan_info {
+--- a/src/common/defs.h
++++ b/src/common/defs.h
+@@ -63,6 +63,10 @@
+ 			 WPA_KEY_MGMT_FT_FILS_SHA256 | \
+ 			 WPA_KEY_MGMT_FT_FILS_SHA384)
+ 
++/* Maximum number of supported rates (from both Supported Rates and Extended
++ * Supported Rates IEs). */
++#define WLAN_SUPP_RATES_MAX 32
++
+ static inline int wpa_key_mgmt_wpa_ieee8021x(int akm)
+ {
+ 	return !!(akm & (WPA_KEY_MGMT_IEEE8021X |
 --- a/src/drivers/driver.h
 +++ b/src/drivers/driver.h
-@@ -19,6 +19,7 @@
- 
- #define WPA_SUPPLICANT_DRIVER_VERSION 4
- 
-+#include "ap/sta_info.h"
- #include "common/defs.h"
- #include "common/ieee802_11_defs.h"
- #include "common/wpa_common.h"
-@@ -953,6 +954,9 @@ struct wpa_driver_associate_params {
+@@ -965,6 +965,9 @@ struct wpa_driver_associate_params {
  	 * responsible for selecting with which BSS to associate. */
  	const u8 *bssid;
  
@@ -42,7 +62,7 @@ Signed-hostap: Antonio Quartulli <ordex@autistici.org>
  #include "config.h"
  
  
-@@ -2389,6 +2390,97 @@ static char * wpa_config_write_mac_value
+@@ -2405,6 +2406,97 @@ static char * wpa_config_write_mac_value
  #endif /* NO_CONFIG_WRITE */
  
  
@@ -140,7 +160,7 @@ Signed-hostap: Antonio Quartulli <ordex@autistici.org>
  /* Helper macros for network block parser */
  
  #ifdef OFFSET
-@@ -2674,6 +2766,8 @@ static const struct parse_data ssid_fiel
+@@ -2690,6 +2782,8 @@ static const struct parse_data ssid_fiel
  	{ INT(ap_max_inactivity) },
  	{ INT(dtim_period) },
  	{ INT(beacon_int) },
@@ -174,7 +194,7 @@ Signed-hostap: Antonio Quartulli <ordex@autistici.org>
  	 * macsec_policy - Determines the policy for MACsec secure session
 --- a/wpa_supplicant/wpa_supplicant.c
 +++ b/wpa_supplicant/wpa_supplicant.c
-@@ -4177,6 +4177,12 @@ static void wpas_start_assoc_cb(struct w
+@@ -4241,6 +4241,12 @@ static void wpas_start_assoc_cb(struct w
  			params.beacon_int = ssid->beacon_int;
  		else
  			params.beacon_int = wpa_s->conf->beacon_int;
