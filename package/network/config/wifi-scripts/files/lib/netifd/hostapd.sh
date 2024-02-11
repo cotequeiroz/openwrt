@@ -81,7 +81,7 @@ hostapd_append_wpa_key_mgmt() {
 				append wpa_key_mgmt FILS-SHA384
 				[ "${ieee80211r:-0}" -gt 0 ] && append wpa_key_mgmt FT-FILS-SHA384
 			;;
-			eap*)
+			eap*|psk*|sae*)
 				append wpa_key_mgmt FILS-SHA256
 				[ "${ieee80211r:-0}" -gt 0 ] && append wpa_key_mgmt FT-FILS-SHA256
 			;;
