@@ -237,10 +237,8 @@ define Device/linksys_e8450-ubi
   IMAGES := sysupgrade.itb
   IMAGE/sysupgrade.itb := append-kernel | fit gzip $$(KDIR)/image-$$(firstword $$(DEVICE_DTS)).dtb external-static-with-rootfs | append-metadata
   ARTIFACTS := preloader.bin bl31-uboot.fip
-  ARTIFACT/preloader.bin := bl2 snand-ubi-1ddr
+  ARTIFACT/preloader.bin := bl2 snand-1ddr
   ARTIFACT/bl31-uboot.fip := bl31-uboot linksys_e8450
-  DEVICE_COMPAT_VERSION := 2.0
-  DEVICE_COMPAT_MESSAGE := SPI-NAND flash layout changes require bootloader update. Please run the UBI installer version 1.1.0+ (unsigned) first.
 endef
 TARGET_DEVICES += linksys_e8450-ubi
 
