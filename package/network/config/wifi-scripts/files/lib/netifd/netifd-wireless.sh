@@ -236,6 +236,7 @@ wireless_vif_parse_encryption() {
 
 	case "$encryption" in
 		*tkip+aes|*tkip+ccmp|*aes+tkip|*ccmp+tkip) wpa_cipher="CCMP TKIP";;
+		*ccmp+gcmp256|*gcmp256-ccmp) wpa_cipher="GCMP-256 CCMP";;
 		*ccmp256) wpa_cipher="CCMP-256";;
 		*aes|*ccmp) wpa_cipher="CCMP";;
 		*tkip) wpa_cipher="TKIP";;
