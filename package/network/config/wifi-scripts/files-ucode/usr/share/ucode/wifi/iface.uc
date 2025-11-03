@@ -82,6 +82,12 @@ export function parse_encryption(config, dev_config) {
 		config.wpa_pairwise = 'CCMP TKIP';
 		break;
 
+	case 'gcmp256+ccmp':
+	case 'ccmp+gcmp256':
+		config.wpa_pairwise = 'GCMP-256 CCMP';
+		config.wpa3_pairwise = 'GCMP-256 CCMP';
+		break;
+
 	case 'ccmp256':
 		config.wpa_pairwise = 'CCMP-256';
 		break;
