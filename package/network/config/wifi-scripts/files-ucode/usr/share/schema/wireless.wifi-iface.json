@@ -165,6 +165,10 @@
 		"basic_rate": {
 			"type": "array"
 		},
+		"bridge_isolate": {
+			"description": "Isolates wireless clients from diferent interfaces in the same bridge, only applicable in ap mode",
+			"type": "boolean"
+		},
 		"bss_load_update_period": {
 			"description": "BSS Load update period (in BUs)",
 			"type": "number",
@@ -341,6 +345,10 @@
 		},
 		"fils_dhcp": {
 			"description": "DHCP server for FILS HLP. Set to '*' for automatic lookup.",
+			"type": "string"
+		},
+		"ft_iface": {
+			"description": "The inter-AP communication interface for 802.11r. In setups using VLAN bridge filtering, hostapd may need to communicate using a VLAN interface on top of the bridge, instead of using the bridge directly.",
 			"type": "string"
 		},
 		"ft_over_ds": {
