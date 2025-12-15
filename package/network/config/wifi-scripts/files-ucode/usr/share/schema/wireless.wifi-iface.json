@@ -169,6 +169,10 @@
 			"description": "Management frame protection for Beacon frames",
 			"type": "boolean"
 		},
+		"bridge_isolate": {
+			"description": "Isolates wireless clients from diferent interfaces in the same bridge, only applicable in ap mode",
+			"type": "boolean"
+		},
 		"bss_load_update_period": {
 			"description": "BSS Load update period (in BUs)",
 			"type": "number",
