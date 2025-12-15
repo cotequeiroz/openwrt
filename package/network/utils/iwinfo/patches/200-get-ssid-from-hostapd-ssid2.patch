@@ -1,0 +1,43 @@
+diff --git a/iwinfo_nl80211.c b/iwinfo_nl80211.c
+index cd801af..b71c186 100644
+--- a/iwinfo_nl80211.c
++++ b/iwinfo_nl80211.c
+@@ -1303,6 +1303,8 @@ static int nl80211_get_ssid(const char *ifname, char *buf)
+ {
+ 	char *res;
+ 	struct nl80211_ssid_bssid sb = { .ssid = (unsigned char *)buf };
++	char ssid2 [ IWINFO_ESSID_MAX_SIZE * 4 + 4 ];
++	char *p;
+ 
+ 	/* try to find ssid from scan dump results */
+ 	res = nl80211_phy2ifname(ifname);
+@@ -1311,11 +1313,28 @@ static int nl80211_get_ssid(const char *ifname, char *buf)
+ 	nl80211_request(res ? res : ifname, NL80211_CMD_GET_SCAN, NLM_F_DUMP,
+ 	                nl80211_get_ssid_bssid_cb, &sb);
+ 
+-	/* failed, try to find from hostapd info */
++	/* failed, try to find from hostapd ssid info */
+ 	if (sb.ssid[0] == 0)
+ 		nl80211_hostapd_query(ifname, "ssid", sb.ssid,
+ 		                      IWINFO_ESSID_MAX_SIZE + 1);
+ 
++	/* failed, try to find from hostapd ssid2 info */
++	if (sb.ssid[0] == 0) {
++		nl80211_hostapd_query(ifname, "ssid2", ssid2,
++		                      sizeof(ssid2));
++		if (ssid2[0] == '"' && (p = strrchr(ssid2 + 1, '"'))) {
++			*p='\0';
++			strncpy((char *)sb.ssid, ssid2 + 1, IWINFO_ESSID_MAX_SIZE + 1);
++		} else if (ssid2[0] == 'p' && ssid2[1] == '"' && (p = strrchr(ssid2 + 2, '"'))) {
++			*p='\0';
++#pragma GCC diagnostic push
++#pragma GCC diagnostic ignored "-Wformat-security"
++//#pragma GCC diagnostic ignored "-Wformat-nonliteral"
++			snprintf((char *)sb.ssid, IWINFO_ESSID_MAX_SIZE + 1, ssid2 + 2);
++#pragma GCC diagnostic pop
++		}
++	}
++
+ 	/* failed, try to obtain Mesh ID */
+ 	if (sb.ssid[0] == 0)
+ 		iwinfo_ubus_query(res ? res : ifname, "mesh_id",
