@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=gettext-full
 PKG_VERSION:=0.24.2
-PKG_RELEASE:=1
+PKG_RELEASE:=1# cotequeiroz
 
 PKG_SOURCE:=gettext-$(PKG_VERSION).tar.xz
 PKG_SOURCE_URL:=@GNU/gettext
@@ -102,6 +102,7 @@ HOST_CONFIGURE_ARGS += \
 	--disable-java \
 	--disable-openmp \
 	--without-emacs \
+	--without-selinux \
 	--with-libiconv-prefix=$(STAGING_DIR_HOSTPKG) \
 	--with-libunistring-prefix=$(STAGING_DIR_HOSTPKG) \
 	--with-libxml2-prefix=$(STAGING_DIR_HOSTPKG)
