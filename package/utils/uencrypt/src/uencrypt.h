@@ -23,6 +23,7 @@ unsigned char *hexstr2buf(const char* str, long *len);
 #  include <wolfssl/openssl/evp.h>
 # else
 #  include <openssl/evp.h>
+#  include <openssl/provider.h>
 # endif
 
 # if defined(EVP_MAX_BLOCK_LENGTH) \

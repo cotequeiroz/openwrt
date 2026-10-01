@@ -14,6 +14,9 @@ const cipher_t *get_default_cipher(void)
 }
 
 #ifndef USE_WOLFSSL
+static int initialized = 0;
+static OSSL_PROVIDER *legacy = NULL;
+
 static void print_ciphers(const OBJ_NAME *name,void *arg) {
     fprintf(arg, "\t%s\n", name->name);
 }
@@ -49,6 +52,13 @@ ctx_t *create_ctx(const cipher_t *cipher, const unsigned char *key,
 {
     EVP_CIPHER_CTX *ctx;
     int ret;
+
+#ifndef USE_WOLFSSL
+    if (!initialized) {
+	legacy = OSSL_PROVIDER_try_load(NULL, "legacy", 1);
+	initialized = 1;
+    }
+#endif
 
     ctx = EVP_CIPHER_CTX_new();
     if (!ctx) {
