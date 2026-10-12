@@ -12,7 +12,7 @@ PKG_CPE_ID:=cpe:/a:gnu:ncurses
 PKG_VERSION_MAJOR:=6.6
 PKG_SNAPSHOT_DATE:=20260801
 PKG_VERSION:=$(PKG_VERSION_MAJOR)$(if $(PKG_SNAPSHOT_DATE),.$(PKG_SNAPSHOT_DATE),)
-PKG_RELEASE:=2
+PKG_RELEASE:=2# cotequeiroz
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/ThomasDickey/ncurses-snapshots.git
@@ -193,6 +193,11 @@ define Build/InstallDev
 	ln -sf $(STAGING_DIR)/host/bin/ncursesw6-config $(1)/usr/bin/ncursesw6-config
 	$(SED) 's,$(TOOLCHAIN_DIR),$(STAGING_DIR),g' \
 		$(1)/usr/lib/pkgconfig/ncursesw.pc
+endef
+
+define Host/Install +=
+
+	ln -sf libncursesw.a $(1)/lib/libncurses.a
 endef
 
 define Host/Compile
